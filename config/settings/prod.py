@@ -120,7 +120,7 @@ STORAGES = {
         "BACKEND": "storages.backends.s3.S3Storage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
@@ -128,6 +128,9 @@ STORAGES = {
 MEDIA_URL = ""
 
 MEDIA_ROOT = "" #os.path.join(BASE_DIR, 'media')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Email configuration for production
 EMAIL_BACKEND = os.getenv(
