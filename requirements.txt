@@ -48,7 +48,7 @@ requests==2.32.5
 rich==14.3.3
 six==1.17.0
 sqlparse==0.5.5
-storage3==2.27.1
+storage3==2.28.0  # aligned with supabase 2.28.0
 StrEnum==0.4.15
 strictyaml==1.7.3
 supabase==2.28.0
