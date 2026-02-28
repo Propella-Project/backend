@@ -94,7 +94,8 @@ CSRF_COOKIE_HTTPONLY = True
 
 # Static files configuration for production
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_DIRS = []
 
 
 
@@ -146,9 +147,11 @@ CACHES = {
     }
 }
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # REST Framework configuration for production
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

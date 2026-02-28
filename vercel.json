@@ -3,15 +3,18 @@
     {
       "src": "config/wsgi.py",
       "use": "@vercel/python",
-      "config":{
-        "buildCommand":"bash build.sh"
+      "config": {
+        "buildCommand": "bash build.sh"
       }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "/static/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
     },
     {
       "src": "/(.*)",
