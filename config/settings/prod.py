@@ -95,7 +95,7 @@ CSRF_COOKIE_HTTPONLY = True
 # Static files configuration for production
 STATIC_URL = '/static/'
 # BASE_DIR is the config/ directory; we want project root
-STATIC_ROOT = BASE_DIR.parent / 'static'  # collectstatic writes here
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'  # collectstatic writes here
 STATICFILES_DIRS = []  # no filler dirs needed in production
 
 
@@ -123,6 +123,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+
 # MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/'
 MEDIA_URL = ""
 

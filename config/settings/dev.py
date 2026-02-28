@@ -6,10 +6,9 @@ from .base import *
 import logging
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gq$%+iw(+v)gg=7a5bxi!r=1==*nz01csq9dd1jelwnx00idyx'
-
+SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '*']
 
