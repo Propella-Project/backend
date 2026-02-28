@@ -54,7 +54,7 @@ LOGGING = {
 
 # Static files configuration for development
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
 
 # Media files configuration for development
 MEDIA_URL = '/media/'
@@ -78,8 +78,8 @@ CACHES = {
 }
 
 # CSRF configuration
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+# CSRF_COOKIE_SECURE = False
+# SESSION_COOKIE_SECURE = False
 
 # Enable verbose error pages
 REST_FRAMEWORK = {

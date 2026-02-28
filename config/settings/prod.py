@@ -79,7 +79,7 @@ LOGGING = {
     },
 }
 
-# Security settings for production
+# # Security settings for production
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_SECURITY_POLICY = {
     'default-src': ("'self'",),
@@ -95,8 +95,9 @@ CSRF_COOKIE_HTTPONLY = True
 # Static files configuration for production
 STATIC_URL = '/static/'
 # BASE_DIR is the config/ directory; we want project root
-STATIC_ROOT = BASE_DIR.parent / 'static'  # collectstatic writes here
-STATICFILES_DIRS = []
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'  # collectstatic writes here
+
+STATICFILES_DIRS = [BASE_DIR.parent / 'static']  # for development, can be empty in production
 
 
 
@@ -120,7 +121,7 @@ STORAGES = {
         "BACKEND": "storages.backends.s3.S3Storage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 # MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/'
@@ -148,7 +149,7 @@ CACHES = {
     }
 }
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # REST Framework configuration for production
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
