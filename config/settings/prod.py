@@ -95,9 +95,8 @@ CSRF_COOKIE_HTTPONLY = True
 # Static files configuration for production
 STATIC_URL = '/static/'
 # BASE_DIR is the config/ directory; we want project root
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'  # collectstatic writes here
-
-STATICFILES_DIRS = [BASE_DIR.parent / 'static']  # for development, can be empty in production
+STATIC_ROOT = BASE_DIR.parent / 'static'  # collectstatic writes here
+STATICFILES_DIRS = []  # no filler dirs needed in production
 
 
 
