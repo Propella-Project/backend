@@ -5,7 +5,7 @@ pip install setuptools
 
 
 echo "Installing dependencies..."
-pip install -r requirements.txt
+uv pip install -r requirements.txt --system
 
 echo "Running migrations..."
 python manage.py makemigrations
