@@ -10,9 +10,20 @@ LEARNING_FORMAT = (
     ('mixed', 'Mixed')
 )
 
+ROLE_CHOICES = (
+    ('student', 'Student'),
+    ('admin', 'Admin'),
+)
+
+VOICE_PREF = (
+    ('male', 'Male'),
+    ('female', 'Female'),
+)
+
 class User(AbstractUser):
     username = models.CharField(max_length=50, blank=True, null=True, unique=True)
     email = models.EmailField(unique=True)
+    role = models.CharField(max_length=20, default='student', choices=ROLE_CHOICES)
     
     
     USERNAME_FIELD = "email"
@@ -36,7 +47,7 @@ class ExamProfile(models.Model):
     daily_hours = models.IntegerField(blank=True, null=True)
     personality = models.CharField(max_length=255, blank=True, null=True)
     learning_format = models.CharField(max_length=50, blank=True, null=True, choices=LEARNING_FORMAT)
-    voice_pref = models.CharField(max_length=25, blank=True, null=True)
+    voice_pref = models.CharField(max_length=25, blank=True, null=True, choices=VOICE_PREF)
     total_points = models.DecimalField(max_digits=12, decimal_places=2 , default=0.00)
     
     def __str__(self):
@@ -44,4 +55,10 @@ class ExamProfile(models.Model):
 
 
     
+class ApiKey(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    key = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self):
+        return f"API Key for {self.user.username}"

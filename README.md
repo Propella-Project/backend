@@ -54,6 +54,27 @@ way Vercel will run it.
     Static assets will be served by Whitenoise from `STATIC_ROOT` and the
     settings match what your Vercel deployment uses.
 
+### API Authentication
+
+The app uses JWT tokens for API requests. To obtain a token, POST to
+`/api/accounts/token/` with `username` and `password`. The response will include
+`access` and `refresh` tokens.
+
+When testing with Postman or curl, be sure to include the access token in the
+`Authorization` header of subsequent requests:
+
+```http
+Authorization: Bearer <your_access_token>
+```
+
+If you omit this header or mis-format it, DRF will reply with
+`{"detail": "Authentication credentials were not provided."}`.
+
+Slow performance in Postman is usually unrelated to authentication; it can be
+caused by DNS lookups, large response bodies, or running the app under
+`DEBUG=True`.  You can speed things up by disabling the browsable API or
+limiting queryset sizes.
+
 ## Notes
 
 *  `DEBUG` is controlled by the `DEBUG` variable in your `.env`.  When set to

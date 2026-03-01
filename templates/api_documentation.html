@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Propella API Documentation</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;line-height:1.5;margin:24px}
+    h1,h2,h3{color:#0b76c2}
+    pre{background:#f4f4f4;padding:12px;border-radius:6px;overflow:auto}
+    .endpoint{border-left:4px solid #0b76c2;padding:12px;margin:18px 0}
+    table{border-collapse:collapse;width:100%;margin:8px 0}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left}
+    th{background:#f0f8ff}
+    .note{background:#fff9c4;padding:8px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <h1>Propella — API Reference</h1>
+  <p>Generated documentation for all API endpoints present in the repository as of this snapshot.</p>
+
+  <h2>Interactive API Documentation</h2>
+  <p>This API includes machine-generated interactive documentation powered by <strong>drf-spectacular</strong> (OpenAPI 3.0).</p>
+  <ul>
+    <li><strong><a href="/api/docs/">Swagger UI</a></strong> — Full interactive API explorer with try-it-out functionality</li>
+    <li><strong><a href="/api/redoc/">ReDoc</a></strong> — Clean, responsive API documentation</li>
+    <li><strong><a href="/api/schema/">Raw OpenAPI Schema</a></strong> (JSON) — Download or use with other tools</li>
+  </ul>
+  <p class="note">The interactive docs are auto-generated from your serializers, views, and docstrings. Tests can be performed directly in the UI by providing your JWT token in the Authorization header.</p>
+
+  <h2>Authentication</h2>
+  <p>This project uses JWT authentication via <code>djangorestframework_simplejwt</code>.</p>
+  <p>Obtain an access token by POSTing credentials to <code>/api/accounts/token/</code>. Include the token in subsequent requests:</p>
+  <pre>Authorization: Bearer &lt;access_token&gt;</pre>
+
+  <div class="endpoint">
+    <h3>Interactive Login / Logout</h3>
+    <p><strong>Purpose:</strong> Quick browser-based login that stores the access token in <code>localStorage</code> and demonstrates using it for authenticated requests.</p>
+    <p><strong>Try it:</strong> open <a href="/apitest-login/">/templates/login.html</a> (or copy the template into a served page) and use the form to authenticate.</p>
+    <h4>How it works (JS snippet)</h4>
+    <pre>// POST credentials to obtain token
+fetch('/api/accounts/token/', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+  body: JSON.stringify({email: 'you@example.com', password: 'password'})
+}).then(r=>r.json()).then(data => {
+  localStorage.setItem('access_token', data.access);
+});
+
+// Use token for requests
+fetch('/api/accounts/all-users/', {
+  headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') }
+}).then(r=>r.json()).then(console.log);
+    </pre>
+    <h4>Login / Logout toggle</h4>
+    <p>The minimal toggle logic used by the documentation page:</p>
+    <pre>if(localStorage.getItem('access_token')){
+  // show logout button
+} else {
+  // show login form
+}
+
+// to logout:
+localStorage.removeItem('access_token');
+    </pre>
+    <p class="muted">Note: the interactive widget in the template uses AJAX (fetch) and stores the token in <code>localStorage</code>. For production clients prefer secure httpOnly cookies or a more secure storage pattern.</p>
+  </div>
+
+  <div class="endpoint">
+    <h3>POST /api/accounts/token/</h3>
+    <p><strong>Purpose:</strong> Obtain JWT access and refresh tokens.</p>
+    <p><strong>Auth:</strong> none</p>
+    <h4>Request body (application/json)</h4>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+      <tr><td>email</td><td>string</td><td>yes</td><td>email (model uses email as USERNAME_FIELD)</td></tr>
+      <tr><td>password</td><td>string</td><td>yes</td><td></td></tr>
+    </table>
+    <h4>Success response (200)</h4>
+    <pre>{
+  "access": "eyJ0eXAi...",
+  "refresh": "eyJ0eXAi..."
+}</pre>
+    <h4>Error</h4>
+    <pre>{"detail": "No active account found with the given credentials"}</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3>POST /api/accounts/token/refresh/</h3>
+    <p><strong>Purpose:</strong> Refresh the access token using a refresh token.</p>
+    <p><strong>Auth:</strong> none</p>
+    <h4>Request body</h4>
+    <pre>{"refresh": "&lt;refresh_token&gt;"}</pre>
+    <h4>Success response</h4>
+    <pre>{"access": "eyJ0eXAi..."}</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3>POST /api/accounts/register/</h3>
+    <p><strong>Purpose:</strong> Create a new user account.</p>
+    <p><strong>Auth:</strong> none</p>
+    <h4>Request body (application/json)</h4>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+      <tr><td>username</td><td>string</td><td>optional</td><td>If omitted a username is derived from email</td></tr>
+      <tr><td>email</td><td>string (email)</td><td>required</td><td>Unique</td></tr>
+      <tr><td>password</td><td>string</td><td>required</td><td>Write-only: returned responses will not include it</td></tr>
+    </table>
+
+    <h4>Success response (201)</h4>
+    <pre>{"message":"User registered successfully"}</pre>
+    <h4>Errors</h4>
+    <pre>{
+  "email": ["user with this Email already exists."],
+  "password": ["This field is required."]
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3>GET /api/accounts/all-users/</h3>
+    <p><strong>Purpose:</strong> Return a list of all users.</p>
+    <p><strong>Auth:</strong> <em>Required</em> — JWT access token. Additionally the view enforces a role check: the requesting user must have <code>role == 'admin'</code>.</p>
+    <h4>Success response (200)</h4>
+    <pre>[
+  {"id":1,"username":"alice","email":"alice@example.com"},
+  {"id":2,"username":"bob","email":"bob@example.com"}
+]</pre>
+    <h4>Error responses</h4>
+    <pre>{"detail":"Authentication credentials were not provided."}  // 401 if token missing/invalid
+{"error":"Unauthorized"}  // 403 if authenticated but not admin</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3>PUT/PATCH /api/accounts/edit-user/&lt;user_id&gt;/</h3>
+    <p><strong>Purpose:</strong> Edit a user's basic fields.</p>
+    <p><strong>Auth:</strong> Required (JWT). Any authenticated user can call this endpoint but the view will fetch the user by id — ensure proper authorization in your front-end or extend the view to restrict edits to self or admins.</p>
+    <h4>Request body (application/json)</h4>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>username</td><td>string</td><td>optional</td></tr>
+      <tr><td>email</td><td>string (email)</td><td>optional</td></tr>
+      <tr><td>password</td><td>string</td><td>optional (write-only)</td></tr>
+    </table>
+    <h4>Success response (200)</h4>
+    <pre>{"message":"User updated successfully"}</pre>
+    <h4>Errors</h4>
+    <pre>{"error":"User not found"}  // 404
+field validation errors // 400</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3>POST /api/accounts/create-exam-profile/</h3>
+    <p><strong>Purpose:</strong> Create an ExamProfile for the authenticated user (view accepts a <code>user</code> reference in the serializer, but typical clients should omit or set it to the authenticated user's id).</p>
+    <p><strong>Auth:</strong> Required (JWT)</p>
+    <h4>Fields</h4>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+      <tr><td>user</td><td>integer (user id)</td><td>optional</td><td>OneToOne relation to <code>User</code>. If omitted, server can set to request.user (not automatic in current view).</td></tr>
+      <tr><td>exam_date</td><td>string (YYYY-MM-DD)</td><td>optional</td><td></td></tr>
+      <tr><td>daily_hours</td><td>integer</td><td>optional</td><td></td></tr>
+      <tr><td>personality</td><td>string</td><td>optional</td><td></td></tr>
+      <tr><td>learning_format</td><td>string</td><td>optional</td><td>One of: text, audio, video, mixed</td></tr>
+      <tr><td>voice_pref</td><td>string</td><td>optional</td><td>
+        One of: male, female
+      </td></tr>
+    </table>
+    <h4>Success response (201)</h4>
+    <pre>{"message":"Exam profile created successfully"}</pre>
+    <h4>Errors</h4>
+    <pre>400 validation errors
+409 or IntegrityError if a profile already exists for the user</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3>PUT/PATCH /api/accounts/edit-exam-profile/&lt;profile_id&gt;/</h3>
+    <p><strong>Purpose:</strong> Update an existing ExamProfile belonging to the authenticated user.</p>
+    <p><strong>Auth:</strong> Required (JWT). The view looks up the profile by id and ensures <code>user==request.user</code> before allowing edits (returns 404 if not found).</p>
+    <h4>Request body</h4>
+    <pre>Same fields as create-exam-profile (all optional)</pre>
+    <h4>Success response</h4>
+    <pre>{"message":"Exam profile updated successfully"}</pre>
+  </div>
+
+  <h2>Models & Field Types (reference)</h2>
+  <h3>User</h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>id</td><td>integer</td><td>Auto-increment primary key</td></tr>
+    <tr><td>username</td><td>string</td><td>max_length=50, unique, can be null; derived from email if blank</td></tr>
+    <tr><td>email</td><td>string (email)</td><td>unique; used as the USERNAME_FIELD</td></tr>
+    <tr><td>role</td><td>string</td><td>choices: student, admin (default: student)</td></tr>
+  </table>
+
+  <h3>ExamProfile</h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>id</td><td>integer</td><td>PK</td></tr>
+    <tr><td>user</td><td>integer (user id)</td><td>OneToOne to User</td></tr>
+    <tr><td>exam_date</td><td>date (YYYY-MM-DD)</td><td>nullable</td></tr>
+    <tr><td>daily_hours</td><td>integer</td><td>nullable</td></tr>
+    <tr><td>personality</td><td>string</td><td>nullable</td></tr>
+    <tr><td>learning_format</td><td>string</td><td>choices: text, audio, video, mixed</td></tr>
+    <tr><td>voice_pref</td><td>string</td><td>nullable</td></tr>
+    <tr><td>total_points</td><td>decimal</td><td>max_digits=12, decimal_places=2, default=0.00</td></tr>
+  </table>
+
+  <h2>Common Response Codes</h2>
+  <ul>
+    <li><strong>200</strong> — OK</li>
+    <li><strong>201</strong> — Created</li>
+    <li><strong>400</strong> — Bad Request / validation error</li>
+    <li><strong>401</strong> — Unauthorized (missing/invalid token)</li>
+    <li><strong>403</strong> — Forbidden (authenticated but not permitted)</li>
+    <li><strong>404</strong> — Not Found</li>
+  </ul>
+
+  <h2>Tips for Postman</h2>
+  <ul>
+    <li>Set <code>Accept: application/json</code> in headers to avoid large HTML browsable API responses.</li>
+    <li>Add <code>Authorization: Bearer &lt;access_token&gt;</code> for protected endpoints.</li>
+    <li>To test admin-only endpoints, create a user with <code>role='admin'</code> or update the DB directly.</li>
+    <li><strong>Import OpenAPI spec into Postman:</strong> Download the spec from <code>/api/schema/</code> and use <code>Import → Link</code> to auto-generate all endpoints with proper auth headers.</li>
+  </ul>
+
+  <h2>OpenAPI / Swagger Integration</h2>
+  <p>This API uses <code>drf-spectacular</code> to auto-generate an <strong>OpenAPI 3.0</strong> specification from your Django REST Framework serializers, views, and docstrings. Every time you update a serializer or view, the schema is automatically regenerated.</p>
+  <h4>Download the OpenAPI schema</h4>
+  <pre>curl http://localhost:8000/api/schema/ > openapi.json</pre>
+  <h4>Generate client code from the schema</h4>
+  <p>Use tools like <a href="https://openapi-generator.tech/">openapi-generator</a> or <a href="https://swagger.io/tools/swagger-codegen/">Swagger Codegen</a> to automatically generate SDK/client code in JavaScript, Python, Go, etc.</p>
+  <h4>Adding docstrings to views</h4>
+  <p>To improve your OpenAPI spec, add docstrings to your API views:</p>
+  <pre>@api_view(['GET'])
+def all_users(request):
+    """
+    Retrieve all users (admin only).
+    
+    Returns a list of all registered users. Requires admin role.
+    """
+    ...</pre>
+
+  <p class="note"><strong>Generated with drf-spectacular:</strong> All interactive documentation above is auto-generated from your code. To customize, see the <code>SPECTACULAR_SETTINGS</code> in your Django settings.</p>
+</body>
+</html>

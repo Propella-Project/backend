@@ -82,12 +82,27 @@ CACHES = {
 
 # Enable verbose error pages
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # Session auth permits use of the browsable API when logged in locally
+    ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+}
+
+# DRF-SPECTACULAR (OpenAPI/Swagger)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Propella API (Dev)',
+    'DESCRIPTION': 'Propella Backend API with JWT authentication',
+    'VERSION': '1.0.0',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SCHEMA_PATH_PREFIX': r'/api/',
 }
 
 # AUTH_USER_MODEL = 'accounts.User'

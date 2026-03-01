@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Propella API - Login</title>
+    <style>
+        body{font-family:Arial,Helvetica,sans-serif;margin:24px}
+        .card{max-width:420px;margin:24px auto;padding:18px;border:1px solid #e0e0e0;border-radius:8px}
+        label{display:block;margin:8px 0 4px}
+        input{width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:4px}
+        button{padding:8px 12px;border:none;background:#0b76c2;color:#fff;border-radius:4px;cursor:pointer}
+        .muted{color:#666;font-size:0.9em}
+        pre{background:#f4f4f4;padding:12px;border-radius:6px;overflow:auto}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Login (JWT)</h2>
+        <form id="loginForm" method="post" action="{% url 'core:login-admin' %}">
+            {% csrf_token %}
+            <label for="email">Email</label>
+            <input id="email" name="email" type="text" required />
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required />
+            <div style="display:flex;gap:8px;align-items:center">
+                <button type="submit">Login</button>
+                <button type="button" id="logoutBtn" style="display:none;background:#777">Logout</button>
+            </div>
+        </form>
+
+        <div id="status" style="margin-top:12px"></div>
+
+        {% comment %} <h4 style="margin-top:16px">Quick actions</h4>
+        <div style="display:flex;gap:8px">
+            <button id="whoami">Who am I?</button>
+            <button id="getUsers">Fetch all users</button>
+        </div> {% endcomment %}
+        <pre id="output" style="margin-top:12px;max-height:240px;overflow:auto"></pre>
+        <p class="muted">Note: this page uses the token endpoint at <code>/api/accounts/token/</code>.</p>
+    </div>
+
+    {% comment %} <script>
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+
+        function setStatus(text, isError=false){
+            status.textContent = text;
+            status.style.color = isError ? '#c00' : '#080';
+        }
+
+        function saveToken(token){
+            localStorage.setItem('access_token', token);
+            updateUI();
+        }
+        function clearToken(){
+            localStorage.removeItem('access_token');
+            updateUI();
+        }
+        function getToken(){
+            return localStorage.getItem('access_token');
+        }
+
+        async function login(e){
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            setStatus('Logging in...');
+            try{
+                const res = await fetch('/api/accounts/token/',{
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json','Accept':'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                if(res.ok && data.access){
+                    saveToken(data.access);
+                    setStatus('Logged in successfully');
+                    output.textContent = JSON.stringify(data, null, 2);
+                    
+                } else {
+                    setStatus('Login failed: ' + (data.detail || JSON.stringify(data)), true);
+                }
+            } catch(err){
+                setStatus('Network error: ' + err.message, true);
+            }
+        }
+
+        function updateUI(){
+            const token = getToken();
+            if(token){
+                logoutBtn.style.display = 'inline-block';
+                loginForm.style.display = 'block';
+                document.getElementById('password').value = '';
+            } else {
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        async function whoami(){
+            const token = getToken();
+            if(!token){ setStatus('Not logged in', true); return; }
+            try{
+                const res = await fetch('/api/accounts/all-users/',{headers:{'Authorization':'Bearer '+token,'Accept':'application/json'}});
+                output.textContent = await res.text();
+            }catch(err){ output.textContent = err.toString(); }
+        }
+
+        async function getUsers(){
+            const token = getToken();
+            if(!token){ setStatus('Not logged in', true); return; }
+            try{
+                const res = await fetch('/api/accounts/all-users/',{headers:{'Authorization':'Bearer '+token,'Accept':'application/json'}});
+                const text = await res.text();
+                output.textContent = text;
+            }catch(err){ output.textContent = err.toString(); }
+        }
+
+        loginForm.addEventListener('submit', login);
+        logoutBtn.addEventListener('click', ()=>{ clearToken(); setStatus('Logged out'); output.textContent = ''; });
+        document.getElementById('whoami').addEventListener('click', whoami);
+        document.getElementById('getUsers').addEventListener('click', getUsers);
+
+        // initial UI state
+        updateUI();
+    </script> {% endcomment %}
+</body>
+</html>

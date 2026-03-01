@@ -15,15 +15,25 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_SECURITY_POLICY = {'default-src': ("'self'",)}
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
+ENFORCE_SECURITY = os.getenv('ENFORCE_SECURITY')
+
+if not DEBUG and ENFORCE_SECURITY:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_SECURITY_POLICY = {'default-src': ("'self'",)}
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+else:
+    # Local development: relax SSL redirect and cookie security for HTTP
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    CSRF_COOKIE_HTTPONLY = True  # still protect against XSS even locally
+    
 
 # ------------------ DATABASE ------------------
 DATABASES = {
@@ -43,8 +53,8 @@ DATABASES = {
 # STATIC served from repo
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR.parent / 'static']  # local folder in repo
-STATIC_ROOT = None
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # for collectstatic, but we use whitenoise to serve from repo
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # MEDIA stored on Supabase S3
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -67,6 +77,7 @@ STORAGES = {
 MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
 MEDIA_ROOT = None
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # ------------------ LOGGING ------------------
 LOGGING = {
     'version': 1,
@@ -84,10 +95,14 @@ LOGGING = {
 
 # ------------------ REST FRAMEWORK ------------------
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.BrowsableAPIRenderer',  # DRF UI works from repo static
         'rest_framework.renderers.JSONRenderer',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_THROTTLE_CLASSES': [
@@ -95,6 +110,15 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {'anon': '100/hour', 'user': '1000/hour'},
+}
+
+# ------------------ DRF-SPECTACULAR (OpenAPI/Swagger) ------------------
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Propella API',
+    'DESCRIPTION': 'Propella Backend API with JWT authentication',
+    'VERSION': '1.0.0',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SCHEMA_PATH_PREFIX': r'/api/',
 }
 
 # ------------------ CORS ------------------
