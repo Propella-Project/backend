@@ -1,0 +1,37 @@
+name,code,category
+Commerce,103,Commercial
+Financial Accounting,104,Commercial
+Christian Religious Studies,202,Arts
+Economics,203,Commercial
+Geography,204,Arts
+Government,205,Arts
+History,207,Arts
+Islamic Studies,208,Arts
+Literature in English,210,Arts
+Civic Education,216,Core
+Arabic,301,Language
+English Language,302,Core
+French,304,Language
+Hausa,327,Language
+Igbo,328,Language
+Yoruba,329,Language
+Further Mathematics,401,Science
+General Mathematics,402,Core
+Agricultural Science,502,Science
+Biology,504,Science
+Chemistry,505,Science
+Health Education,508,Science
+Physical Education,511,Science
+Physics,512,Science
+Auto Mechanics,603,Vocational
+Building Construction,604,Vocational
+Metal Work,607,Vocational
+Technical Drawing,608,Vocational
+Woodwork,609,Vocational
+Basic Electricity,614,Vocational
+Basic Electronics,615,Vocational
+Clothing and Textiles,701,Vocational
+Foods and Nutrition,702,Vocational
+Home Management,703,Vocational
+Music,705,Arts
+Visual Art,706,Arts

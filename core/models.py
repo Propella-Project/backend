@@ -5,9 +5,19 @@ from django.utils import timezone
 User = get_user_model()
 
 # Create your models here.
+SUBJECT_CATEGORIES = (
+    ('core', 'core'),
+    ('commercial', 'commercial'),
+    ('arts', 'arts'),
+    ('science', 'science'),
+    ('vocational', 'vocational'),
+    ('language', 'language'),
+)
 
 class Subject(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    code = models.IntegerField(blank=True, null=True, unique=True)
+    category = models.CharField(max_length=255, blank=True, null=True, choices=SUBJECT_CATEGORIES)
     
     def __str__(self):
         return self.name
