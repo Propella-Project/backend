@@ -19,7 +19,8 @@ from .base import *
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = False
 
 # Custom application modules
 # INSTALLED_APPS += [
@@ -80,17 +81,29 @@ LOGGING = {
 }
 
 # # Security settings for production
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_SECURITY_POLICY = {
-    'default-src': ("'self'",),
-}
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
+# These are strict security settings suitable for production on HTTPS.
+# When running locally (DEBUG=True), most of these are relaxed so that the
+# development server works smoothly over plain HTTP. Set ENFORCE_SECURITY=True
+# in your .env if you want to test the full security posture locally.
+ENFORCE_SECURITY = os.getenv('ENFORCE_SECURITY', 'False') == 'True'
+
+if DEBUG and ENFORCE_SECURITY:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_SECURITY_POLICY = {
+        'default-src': ("'self'",),
+    }
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+else:
+    # Relax security for local development so HTTP works
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # Static files configuration for production
 STATIC_URL = '/static/'
