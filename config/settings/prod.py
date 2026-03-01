@@ -87,7 +87,7 @@ LOGGING = {
 # in your .env if you want to test the full security posture locally.
 ENFORCE_SECURITY = os.getenv('ENFORCE_SECURITY', 'False') == 'True'
 
-if DEBUG and ENFORCE_SECURITY:
+if not DEBUG and ENFORCE_SECURITY:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_SECURITY_POLICY = {
         'default-src': ("'self'",),
