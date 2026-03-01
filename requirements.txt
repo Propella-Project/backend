@@ -1,6 +1,8 @@
 annotated-types==0.7.0
 anyio==4.12.1
 asgiref==3.11.1
+boto3==1.42.59
+botocore==1.42.59
 cachetools==6.2.6
 certifi==2026.2.25
 cffi==2.0.0
@@ -13,6 +15,7 @@ Django==6.0.2
 django-extensions==4.1
 django-rest-framework==0.1.0
 django-restframework==0.0.1
+django-storages==1.14.6
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 dotenv==0.9.9
@@ -25,6 +28,7 @@ httpcore==1.0.9
 httpx==0.28.1
 hyperframe==6.1.0
 idna==3.11
+jmespath==1.1.0
 markdown-it-py==4.0.0
 mdurl==0.1.2
 mmh3==5.2.0
@@ -46,9 +50,10 @@ python-dotenv==1.2.1
 realtime==2.28.0
 requests==2.32.5
 rich==14.3.3
+s3transfer==0.16.0
 six==1.17.0
 sqlparse==0.5.5
-storage3==2.28.0  # aligned with supabase 2.28.0
+storage3==2.28.0
 StrEnum==0.4.15
 strictyaml==1.7.3
 supabase==2.28.0
