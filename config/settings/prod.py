@@ -36,10 +36,10 @@ DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('DB_NAME') or os.getenv('DATABASE', 'postgres'),
-        'USER': os.getenv('USER', 'postgres'),
-        'PASSWORD': os.getenv('PASSWORD', ''),
-        'HOST': os.getenv('HOST'),
-        'PORT': os.getenv('PORT', '5432'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '5432'),
         'CONN_MAX_AGE': 600,
             'OPTIONS': {
                 'connect_timeout': 10,
@@ -142,7 +142,7 @@ MEDIA_URL = ""
 
 MEDIA_ROOT = "" #os.path.join(BASE_DIR, 'media')
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Email configuration for production

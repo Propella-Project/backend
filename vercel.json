@@ -1,21 +1,23 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "config/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "buildCommand": "bash build.sh"
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9"
       }
     }
   ],
   "routes": [
-
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
     {
       "src": "/(.*)",
-      "dest": "config/wsgi.py",
-      "headers": {
-        "Cache-Control": "public, max-age=3600"
-      }
+      "dest": "config/wsgi.py"
     }
   ]
 }
