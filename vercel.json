@@ -9,16 +9,13 @@
     }
   ],
   "routes": [
+
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1",
+      "src": "/(.*)",
+      "dest": "config/wsgi.py",
       "headers": {
         "Cache-Control": "public, max-age=3600"
       }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "config/wsgi.py"
     }
   ]
 }
