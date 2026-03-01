@@ -127,23 +127,24 @@ AWS_S3_CUSTOM_DOMAIN = f'duvupolpkzuaqsmhflaw.storage.supabase.co/storage/v1/obj
 # Optional: Ensure Django doesn't try to set ACLs (Supabase doesn't support them)
 AWS_DEFAULT_ACL = None 
 
-# Set as default storage for media files
+# Use S3 for static and media
 STORAGES = {
-    "default": {
+    "default": {  # MEDIA
         "BACKEND": "storages.backends.s3.S3Storage",
     },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    "staticfiles": {  # STATIC
+        "BACKEND": "storages.backends.s3.S3Storage",
     },
 }
 
-# MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/'
-MEDIA_URL = ""
+# Set as default storage for media files
+STATIC_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/static/"
+MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
 
-MEDIA_ROOT = "" #os.path.join(BASE_DIR, 'media')
-
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+# Remove local paths — Vercel filesystem is ephemeral
+STATIC_ROOT = None
+STATICFILES_DIRS = None
+MEDIA_ROOT = None
 
 # Email configuration for production
 EMAIL_BACKEND = os.getenv(
@@ -167,6 +168,7 @@ CACHES = {
 
 
 # REST Framework configuration for production
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.BrowsableAPIRenderer',
