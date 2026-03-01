@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import User, ExamProfile
+from .models import User, ExamProfile, EmailVerification
 from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer
+from .utils import send_verification_code
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from  rest_framework import status
@@ -13,10 +14,31 @@ from rest_framework.decorators import api_view, permission_classes
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
+    """
+    Register a new user and send verification email.
+    
+    The user will be created but marked as inactive until they verify their email.
+    """
     serializer = CreateUserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+        
+        # Generate and send verification code
+        verification = EmailVerification.generate_for_user(user)
+        email_sent = send_verification_code(user, verification)
+        
+        if email_sent:
+            return Response({
+                'message': 'User registered successfully. Please check your email for verification code.',
+                'email': user.email
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # User created but email failed
+            return Response({
+                'message': 'User registered but verification email could not be sent. Please contact support.',
+                'email': user.email
+            }, status=status.HTTP_201_CREATED)
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT', 'PATCH'])
@@ -37,6 +59,11 @@ def edit_user(request, user_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_exam_profile(request):
+    if not request.user.is_email_verified:
+        return Response({
+            'error': 'You must verify your email before creating an exam profile.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
     serializer = CreateExamProfileSerializer(data=request.data)
     if serializer.is_valid():
         exam_profile = serializer.save()
@@ -64,3 +91,111 @@ def all_users(request):
         return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
     users = User.objects.all()
     return Response(AllUsersSerializer(users, many=True).data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    """
+    Verify user email with the verification code sent to their email.
+    
+    Endpoint expects:
+    - email: the user's email address
+    - code: the 6-digit verification code
+    """
+    email = request.data.get('email')
+    code = request.data.get('code')
+    
+    if not email or not code:
+        return Response({
+            'error': 'Both email and code are required'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({
+            'error': 'User not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        verification = EmailVerification.objects.get(user=user)
+    except EmailVerification.DoesNotExist:
+        return Response({
+            'error': 'No verification code found for this email. Please register again.'
+        }, status=status.HTTP_404_NOT_FOUND)
+    
+    # Check if code is valid
+    if not verification.is_valid():
+        if verification.attempts >= verification.max_attempts:
+            return Response({
+                'error': 'Too many failed attempts. Please request a new verification code.'
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        else:
+            return Response({
+                'error': 'Verification code has expired. Please request a new code.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if code matches
+    if verification.code != code:
+        verification.increment_attempts()
+        remaining = verification.max_attempts - verification.attempts
+        return Response({
+            'error': f'Invalid code. {remaining} attempts remaining.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Code is valid - mark user as verified
+    user.is_email_verified = True
+    user.is_active = True  # Activate the user
+    user.save()
+    
+    verification.verified = True
+    verification.save()
+    
+    return Response({
+        'message': 'Email verified successfully. Your account is now active.'
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def resend_verification_code(request):
+    """
+    Resend verification code to user's email.
+    
+    Endpoint expects:
+    - email: the user's email address
+    """
+    email = request.data.get('email')
+    
+    if not email:
+        return Response({
+            'error': 'Email is required'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Don't reveal if user exists or not
+        return Response({
+            'message': 'If an account with this email exists, a verification code has been sent.'
+        }, status=status.HTTP_200_OK)
+    
+    if user.is_email_verified:
+        return Response({
+            'message': 'This email is already verified.'
+        }, status=status.HTTP_200_OK)
+    
+    # Generate new verification code
+    verification = EmailVerification.generate_for_user(user)
+    email_sent = send_verification_code(user, verification)
+    
+    if email_sent:
+        return Response({
+            'message': 'Verification code has been sent to your email.'
+        }, status=status.HTTP_200_OK)
+    else:
+        return Response({
+            'error': 'Failed to send verification code. Please try again later.'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    

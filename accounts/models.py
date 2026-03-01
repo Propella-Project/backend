@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from datetime import timedelta
+import secrets
 # from core.models import UserSubject
 
 # Create your models here.
@@ -24,7 +27,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=50, blank=True, null=True, unique=True)
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, default='student', choices=ROLE_CHOICES)
-    
+    is_email_verified = models.BooleanField(default=False)
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
@@ -53,6 +56,48 @@ class ExamProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Exam Profile"
 
+
+    
+class EmailVerification(models.Model):
+    """Model to store email verification codes and track verification status."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_verification')
+    code = models.CharField(max_length=6, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.IntegerField(default=0)
+    max_attempts = models.IntegerField(default=5)
+    verified = models.BooleanField(default=False)
+    
+    def is_valid(self):
+        """Check if code is still valid and hasn't exceeded max attempts."""
+        return (
+            timezone.now() < self.expires_at and 
+            self.attempts < self.max_attempts and 
+            not self.verified
+        )
+    
+    def increment_attempts(self):
+        """Increment failed verification attempts."""
+        self.attempts += 1
+        self.save()
+    
+    @classmethod
+    def generate_for_user(cls, user, expires_in_minutes=15):
+        """Generate a new verification code for a user."""
+        code = ''.join(secrets.choice('0123456789') for _ in range(6))
+        expires_at = timezone.now() + timedelta(minutes=expires_in_minutes)
+        
+        # Delete any existing verification for this user
+        cls.objects.filter(user=user).delete()
+        
+        return cls.objects.create(
+            user=user,
+            code=code,
+            expires_at=expires_at
+        )
+    
+    def __str__(self):
+        return f"Verification for {self.user.email}"
 
     
 class ApiKey(models.Model):

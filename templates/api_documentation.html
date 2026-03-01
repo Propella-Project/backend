@@ -108,12 +108,49 @@ localStorage.removeItem('access_token');
     </table>
 
     <h4>Success response (201)</h4>
-    <pre>{"message":"User registered successfully"}</pre>
+    <pre>{"message":"User registered successfully. Please check your email for verification code.","email":"user@example.com"}</pre>
     <h4>Errors</h4>
     <pre>{
   "email": ["user with this Email already exists."],
   "password": ["This field is required."]
 }</pre>
+    <p class="muted"><strong>Important:</strong> After registration, the user will receive a verification code to their email. They must call <code>POST /api/accounts/verify-email/</code> with this code to activate their account.</p>
+  </div>
+
+  <div class="endpoint">
+    <h3>POST /api/accounts/verify-email/</h3>
+    <p><strong>Purpose:</strong> Verify user email with the 6-digit code sent to their inbox.</p>
+    <p><strong>Auth:</strong> none</p>
+    <h4>Request body (application/json)</h4>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+      <tr><td>email</td><td>string (email)</td><td>yes</td><td>The registered email address</td></tr>
+      <tr><td>code</td><td>string (digits)</td><td>yes</td><td>6-digit verification code from email</td></tr>
+    </table>
+
+    <h4>Success response (200)</h4>
+    <pre>{"message":"Email verified successfully. Your account is now active."}</pre>
+    <h4>Error responses</h4>
+    <pre>{"error":"Invalid code. 4 attempts remaining."}  // 400 for wrong code
+{"error":"Verification code has expired. Please request a new code."}  // 400 if expired
+{"error":"Too many failed attempts. Please request a new verification code."}  // 429</pre>
+    
+    <p class="muted">The code expires 15 minutes after sending. Users have 5 attempts to enter the correct code.</p>
+  </div>
+
+  <div class="endpoint">
+    <h3>POST /api/accounts/resend-code/</h3>
+    <p><strong>Purpose:</strong> Request a new verification code (if the previous one expired or was lost).</p>
+    <p><strong>Auth:</strong> none</p>
+    <h4>Request body (application/json)</h4>
+    <table>
+      <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+      <tr><td>email</td><td>string (email)</td><td>yes</td><td>The registered email address</td></tr>
+    </table>
+
+    <h4>Success response (200)</h4>
+    <pre>{"message":"Verification code has been sent to your email."}</pre>
+    <p class="muted">Returns success even if email doesn't exist in the system (for security). If email is already verified, returns a friendly message.</p>
   </div>
 
   <div class="endpoint">
