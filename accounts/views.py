@@ -150,7 +150,7 @@ def verify_email(request):
     user.is_active = True  # Activate the user
     user.save()
     
-    referral = Referral.objects.filter(referred=user, status='pending')
+    referral = Referral.objects.get(referred=user, status='pending')
     if referral:
         referral.status = 'completed'
         referral.points = 10  # Award points for successful referral

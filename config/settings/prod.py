@@ -13,9 +13,12 @@ from .base import *
 # ------------------ SECURITY ------------------
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 ENFORCE_SECURITY = os.getenv('ENFORCE_SECURITY')
+# ENFORCE_SECURITY = True
+# DEBUG = False
 
 if not DEBUG and ENFORCE_SECURITY:
     SECURE_BROWSER_XSS_FILTER = True
@@ -36,25 +39,31 @@ else:
     
 
 # ------------------ DATABASE ------------------
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME') or os.getenv('DATABASE', 'postgres'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        'CONN_MAX_AGE': 600,
-        'OPTIONS': {'connect_timeout': 10},
+USE_SUPABASE = os.getenv('USE_SUPABASE', 'False') == 'True'
+
+if USE_SUPABASE:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': os.getenv('DB_NAME') or os.getenv('DATABASE', 'postgres'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {'connect_timeout': 10},
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ------------------ STATIC / MEDIA ------------------
-# STATIC served from repo
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR.parent / 'static']  # local folder in repo
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # for collectstatic, but we use whitenoise to serve from repo
-# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Static files handled by WhiteNoise with compression (see base.py)
 
 # MEDIA stored on Supabase S3
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -77,7 +86,8 @@ STORAGES = {
 MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
 MEDIA_ROOT = None
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Static files compression handled by WhiteNoise with manifest storage (see base.py)
+
 # ------------------ LOGGING ------------------
 LOGGING = {
     'version': 1,

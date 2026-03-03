@@ -51,9 +51,7 @@ LOGGING = {
     },
 }
 
-# Static files configuration for development
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+# Static files configured in base.py with WhiteNoise support
 
 # Media files configuration for development
 MEDIA_URL = '/media/'

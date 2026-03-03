@@ -40,6 +40,9 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '')
 # Application definition
 
 INSTALLED_APPS = [
+    # Jazzmin replaces the default Django admin templates so it should be
+    # listed before 'django.contrib.admin'.
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -131,14 +134,196 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = None
-STATICFILES_DIRS = [BASE_DIR.parent / 'static']
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Collected static files directory
+STATICFILES_DIRS = [BASE_DIR.parent / 'static']  # Development static files
+
+# Use WhiteNoise for serving static files with compression
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 AUTH_USER_MODEL = 'accounts.User'
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
+
+# Jazzmin admin theme settings - comprehensive customization
+JAZZMIN_SETTINGS = {
+    # Site Branding
+    "site_title": "Propella",
+    "site_header": "Propella Admin Portal",
+    "site_brand": "Propella",
+    "site_logo": "/images/logo.png",  # Optional: Add your logo here
+    "site_logo_classes": "img-circle",
+    "site_icon": None,  # Optional: Use a small favicon
+    "welcome_sign": "Welcome to Propella Admin Portal",
+    "copyright": "Propella © 2026. All rights reserved.",
+    
+    # Dashboard customization
+    "dashboard_namespace": "admin:index",
+    "show_statistics": True,
+    "show_ui_builder_on_site_header": False,
+    "changeform_format": "carousel",  # Options: horizontal, vertical, carousel
+    "changeform_format_overrides": {
+        "auth.user": "horizontal",
+        "auth.group": "vertical",
+    },
+    
+    # Related modal options
+    "related_modal_active": True,
+    "related_modal_inline": "modal",  # Options: modal, tabbed, standard
+    
+    # Search Field
+    "search_show_neighbours": False,
+    "search_fields": [],  # Add model fields for global search
+    
+    # Navigation and top bar
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "accounts.user": "fas fa-user-circle",
+        "accounts.examprofile": "fas fa-id-card",
+        "accounts.apikey": "fas fa-key",
+        "core.subject": "fas fa-book",
+    },
+    "default_icon_parents": "fas fa-chevron-right",
+    "default_icon_children": "fas fa-arrow-right",
+    
+    # Custom links
+    "custom_links": {
+        "accounts": [
+            {
+                "name": "View Users",
+                "url": "/admin/accounts/user/",
+                "icon": "fas fa-users",
+                "permissions": ["accounts.view_user"],
+            },
+        ],
+        "core": [
+            {
+                "name": "Manage Subjects",
+                "url": "/admin/core/subject/",
+                "icon": "fas fa-book-open",
+                "permissions": ["core.view_subject"],
+            },
+        ]
+    },
+    
+    # Admin site configuration
+    "userswitcher_demouser_redirect": "/admin",  # Redirect after user switch
+    
+    # Toasts/notifications
+    "show_form_top": False,
+    "show_form_bottom": False,
+    
+    # Footer configuration
+    "footer_row": True,
+    "footer": "Propella Admin Portal | Django with Jazzmin",
+    
+    # Language and timezone
+    "language_chooser": False,
+    "timezone": None,
+    
+    # Show/hide admin modules
+    "show_administration_permission": True,
+    "admin_has_add_view": True,
+    "app_icons": {
+        "accounts": {
+            "icon": "fas fa-user-shield",
+            "color": "#1e90ff",
+        },
+        "core": {
+            "icon": "fas fa-graduation-cap",
+            "color": "#20c997",
+        },
+        "auth": {
+            "icon": "fas fa-lock",
+            "color": "#ff6b6b",
+        },
+    },
+    
+    # Sidebar colors and theming
+    "order_with_respect_to": [],
+    "custom_css": "/css/jazzmin-custom.css",  # Bootstrap-enhanced custom CSS
+    "custom_js": None,   # Path to custom JS file
+    
+    # Modal window customization
+    "modal_maximum_width": 900,
+    
+    # Window title
+    "window_size": "maximized",  # Options: maximized, floating
+    
+    # Breadcrumbs
+    "show_breadcrumbs": True,
+    
+    # Form field colors (for change forms)
+    "field_colors": {},
+}
+
+# Jazzmin UI elements configuration with Bootstrap theming
+JAZZMIN_UI_TWEAKS = {
+    # Sizing options
+    "navbar_small": False,
+    "footer_small": False,
+    "body_small": False,
+    "brand_small": False,
+    
+    # Navbar configuration with Bootstrap colors
+    "brand_colour": "navbar-primary",  # Bootstrap primary color
+    "accent": "accent-primary",  # Primary accent color
+    "navbar": "navbar-light navbar-gradient",  # Light modern navbar
+    "no_navbar_border": True,  # Remove navbar border
+    "navbar_fixed": False,  # Sticky navbar (optional)
+    
+    # Layout options
+    "layout_boxed": False,  # Full-width layout
+    "footer_fixed": False,  # Fixed footer
+    "sidebar_fixed": False,  # Fixed sidebar
+    
+    # Sidebar navigation styling
+    "sidebar_nav_small_icon": False,  # Normal icon size
+    "sidebar_disable_auto_collapse": False,  # Allow auto-collapse
+    "sidebar_nav_compact": False,  # Standard spacing
+    "sidebar_nav_legacy": False,  # Modern sidebar style
+    "sidebar_nav_flat": False,  # Non-flat for depth
+    "sidebar_nav_bold": True,  # Bold text for better readability
+    "sidebar_nav_child_indent": True,  # Indent child items
+    "sidebar_nav_child_hide_when_collapse": True,  # Hide children when collapsed
+    
+    # Button styling with Bootstrap classes
+    "buttons_flatten": False,  # Use Bootstrap shadows
+    "button_classes": {
+        "primary": "btn btn-primary btn-gradient",
+        "secondary": "btn btn-secondary",
+        "info": "btn btn-info",
+        "warning": "btn btn-warning",
+        "danger": "btn btn-danger",
+        "success": "btn btn-success",
+    },
+    
+    # Additional Bootstrap customization
+    "actions_sticky_top": True,  # Sticky actions bar
+    
+    # Color scheme
+    "primary_color": "#1e90ff",  # Dodger blue
+    "secondary_color": "#6c757d",  # Gray
+    "success_color": "#20c997",  # Teal
+    "danger_color": "#ff6b6b",  # Red
+    "warning_color": "#ffc107",  # Amber
+    "info_color": "#17a2b8",  # Cyan
+    
+    # Border and spacing with Bootstrap utilities
+    "border_style": "border-1",
+    "shadow_style": "shadow",
+    "radius_style": "rounded",
+}
+
+
+
+
+    
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

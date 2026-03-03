@@ -22,7 +22,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         if referral_code:
             referral_code = referral_code.strip().upper()
-            referrer = User.objects.filter(referral_code=referral_code)
+            referrer = User.objects.get(referral_code=referral_code)
             
             if referrer.id == user.id:
                 raise serializers.ValidationError("You cannot use your own referral code.")
@@ -30,8 +30,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
             user.referred_by = referrer
             user.save(update_fields=['referred_by'])
             
-            Referral.objects.create(referrer=referrer, referred=user, status='pending', points=...)
-            
+            ref = Referral.objects.create(referrer=referrer, referred=user, status='pending')
+            ref.save()
         return user
     
 class EditUserSerializer(serializers.ModelSerializer):

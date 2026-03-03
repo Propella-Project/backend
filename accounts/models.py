@@ -30,7 +30,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, default='student', choices=ROLE_CHOICES)
     is_email_verified = models.BooleanField(default=False)
     referral_code = models.CharField(max_length=12, null=True, blank=True)
-    referred_by = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
+    referred_by = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
