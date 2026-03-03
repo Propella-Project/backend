@@ -142,6 +142,8 @@ if custom_domain := os.getenv('CUSTOM_DOMAIN'):
     CORS_ALLOWED_ORIGINS.append(f'https://{custom_domain}')
 if vercel_url := os.getenv('VERCEL_URL'):
     CORS_ALLOWED_ORIGINS.append(f'https://{vercel_url}')
+if frontend_url := os.getenv('FRONTEND_URL'):
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
 CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://.*\.vercel\.app$"]
 
 # ------------------ AUTH / SUPABASE ------------------
