@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+import uuid
 # from core.models import UserSubject
 
 # Create your models here.
@@ -28,17 +29,25 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, default='student', choices=ROLE_CHOICES)
     is_email_verified = models.BooleanField(default=False)
+    referral_code = models.CharField(max_length=12, null=True, blank=True)
+    referred_by = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
-    
+            
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = self.email.split('@')[0]
+        if not self.referral_code:
+            self.referral_code = uuid.uuid4().hex[:8].upper()
         super().save(*args, **kwargs)
         
     def __str__(self):
-        return self.username    
+        return self.username
+
+    
+    def user_referrals(self):
+        return Referral.objects.filter(referrer=self)
     
     # def subjects(self):
     #     return UserSubject.objects.filter(user=self)
@@ -107,3 +116,20 @@ class ApiKey(models.Model):
     
     def __str__(self):
         return f"API Key for {self.user.username}"
+    
+class Referral(models.Model):
+    
+    STATUS = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        
+    )
+    referrer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referrer')
+    referred = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referred')
+    status = models.CharField(max_length=20, default='pending', choices=STATUS)
+    points = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.referrer.username} referred {self.referred.username} - Status: {self.status}"
+    

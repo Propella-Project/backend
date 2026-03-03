@@ -1,18 +1,37 @@
 from rest_framework import serializers
-from .models import User, ExamProfile
+from django.db import transaction
+from .models import User, ExamProfile, Referral
 
 class CreateUserSerializer(serializers.ModelSerializer):
+    referral_code = serializers.CharField(required=False, allow_blank=True, max_length=12, write_only=True)
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password', 'referral_code']
         extra_kwargs = {'password': {'write_only': True}}
 
+    def validate_referral_code(self, value):
+        if value:
+            value = value.strip().upper()
+            
+            if not User.objects.filter(referral_code=value).exists():
+                raise serializers.ValidationError("Invalid referral code.")
+        return value
+    
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
+        referral_code = validated_data.pop('referral_code', None)
+        user = User.objects.create_user(**validated_data)
+        if referral_code:
+            referral_code = referral_code.strip().upper()
+            referrer = User.objects.filter(referral_code=referral_code)
+            
+            if referrer.id == user.id:
+                raise serializers.ValidationError("You cannot use your own referral code.")
+            
+            user.referred_by = referrer
+            user.save(update_fields=['referred_by'])
+            
+            Referral.objects.create(referrer=referrer, referred=user, status='pending', points=...)
+            
         return user
     
 class EditUserSerializer(serializers.ModelSerializer):
@@ -41,3 +60,8 @@ class AllExamProfilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExamProfile
         fields = ['id', 'user', 'exam_date', 'daily_hours', 'personality', 'learning_format', 'voice_pref', 'total_points']
+        
+# class CreateReferralSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Referral
+#         fields = ['id', 'referrer', 'referred']

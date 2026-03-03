@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import User, ExamProfile, EmailVerification
+from .models import User, ExamProfile, EmailVerification, Referral
 from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer
 from .utils import send_verification_code
 
@@ -145,9 +145,16 @@ def verify_email(request):
         }, status=status.HTTP_400_BAD_REQUEST)
     
     # Code is valid - mark user as verified
+    
     user.is_email_verified = True
     user.is_active = True  # Activate the user
     user.save()
+    
+    referral = Referral.objects.filter(referred=user, status='pending')
+    if referral:
+        referral.status = 'completed'
+        referral.points = 10  # Award points for successful referral
+        referral.save()
     
     verification.verified = True
     verification.save()

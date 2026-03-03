@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, ExamProfile
+from .models import User, ExamProfile, Referral
 
 # Register your models here.
 admin.site.site_header = "Propella Admin"
@@ -8,3 +8,5 @@ admin.site.index_title = "Welcome to Propella Admin Portal"
 
 admin.site.register(User)
 admin.site.register(ExamProfile)
+
+admin.site.register(Referral)
