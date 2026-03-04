@@ -17,8 +17,15 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # CORS Configuration
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if os.getenv('CORS_ALLOWED_ORIGINS') else ['http://localhost:3000', 'http://localhost:8000', 'http://127.0.0.1:3000']
 
-CORS_ALLOW_CREDENTIALS = True
+# Allow all origins if CORS_ALLOW_ALL is set to True (for development)
+if os.getenv('CORS_ALLOW_ALL', 'False') == 'True':
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_CREDENTIALS = False
+else:
+    CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -29,6 +36,15 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
 ]
 
 ENFORCE_SECURITY = os.getenv('ENFORCE_SECURITY')
