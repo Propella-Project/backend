@@ -6,4 +6,5 @@ app_name = 'core'
 urlpatterns = [
     path('login/', views.login_admin, name='login-admin'),
     path('', views.api_docs, name='api-docs'),
+    path('logout/', views.logout_admin, name='logout-admin'),
 ]

@@ -32,6 +32,9 @@ class UserSubject(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     
+    def __str__(self):
+        return self.subject.name
+    
 class Streak(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     current_streak = models.IntegerField()
@@ -41,13 +44,14 @@ class Streak(models.Model):
         return f'{self.user.username}\'s -- Current Streak {self.current_streak} -- Longest Streak {self.longest_streak}'
     
 class Topic(models.Model):
-    
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, blank=True, null=True)
     # weight = models.CharField
     
     def __str__(self):
         return self.name
+    
+    
 MATERIAL_TYPE = (
     ("core", "Core Lesson"),
     ("revision", "Revision Note"),
@@ -144,6 +148,7 @@ class RoadmapDay(models.Model):
 
 
     def __str__(self):
+        
         return f"{self.roadmap.name} - Day {self.day_number}: {self.status} - {self.intensity_level} - {self.repition_phase}"
     
     def tasks(self):

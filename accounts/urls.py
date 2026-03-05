@@ -10,7 +10,7 @@ urlpatterns = [
     path('resend-code/', views.resend_verification_code, name='resend_code'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
+    path('change-password/', views.change_password, name='change_password'),
     path('all-users/', views.all_users, name='all_users'),
     path('edit-user/<int:user_id>/', views.edit_user, name='edit_user'),
     path('create-exam-profile/', views.create_exam_profile, name='create_exam_profile'),

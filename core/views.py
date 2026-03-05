@@ -40,3 +40,64 @@ def logout_admin(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect("core:login-admin")
+
+
+# ============================================================================================================
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+
+from .models import (
+    Subject,
+    UserSubject,
+    Streak,
+    Topic,
+    StudyMaterial,
+    Roadmap,
+    RoadmapDay,
+    RoadmapTask,
+    Assignment,     
+    Question,
+    Choice,
+    AbilityScore,
+)
+
+from .serializers import (
+    SubjectSerializer,
+    UserSubjectSerializer,
+    StreakSerializer,
+    TopicSerializer,
+    StudyMaterialSerializer,
+    RoadmapSerializer,
+    RoadmapDaySerializer,
+    RoadmapTaskSerializer,
+    AssignmentSerializer,
+    QuestionSerializer,
+    ChoiceSerializer,
+    AbilityScoreSerializer,
+)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_all_subjects(request):
+    subjects = Subject.objects.all()
+    serializer = SubjectSerializer(subjects, many=True)
+    return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_user_subject(request):
+    if not request.user.is_email_verified:
+        return Response({
+            'error': 'You must verify your email before adding subjects.'
+        }, status=400)
+    
+    serializer = UserSubjectSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({
+            'message': 'User subject created successfully',
+            'user_subject': serializer.data
+        }, status=201)
+    return Response(serializer.errors, status=400)

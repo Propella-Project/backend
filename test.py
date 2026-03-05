@@ -1,9 +1,6 @@
-from config.settings.prod import EMAIL_BACKEND, EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_EMAIL
+import requests
 
-print("EMAIL_BACKEND:", EMAIL_BACKEND)
-print("EMAIL_HOST:", EMAIL_HOST)
-print("EMAIL_PORT:", EMAIL_PORT)
-print("EMAIL_USE_TLS:", EMAIL_USE_TLS)
-print("EMAIL_HOST_USER:", EMAIL_HOST_USER)
-print("EMAIL_HOST_PASSWORD:", EMAIL_HOST_PASSWORD)
-print("DEFAULT_FROM_EMAIL:", DEFAULT_FROM_EMAIL)
+url = "https://api.propella.ng/"
+
+response = requests.get(url)
+print(response.status_code)

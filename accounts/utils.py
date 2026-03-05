@@ -36,7 +36,7 @@ def send_verification_code(user, verification_code):
             <p>This code will expire in 15 minutes.</p>
             <p>If you did not create this account, please ignore this email.</p>
             <hr>
-            <p style="color:#666;font-size:0.9em">Propella API • {settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'api.propella.com'}</p>
+            <p style="color:#666;font-size:0.9em">Propella • {settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'propella.ng'}</p>
         </body>
     </html>
     """

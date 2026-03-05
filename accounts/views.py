@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import User, ExamProfile, EmailVerification, Referral
-from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer
+from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer
 from .utils import send_verification_code
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -54,6 +54,25 @@ def edit_user(request, user_id):
         serializer.save()
         return Response({'message': 'User updated successfully'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    serializer = ChangePasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        user = request.user
+        
+        old_password = serializer.validated_data['old_password']
+        new_password = serializer.validated_data['new_password']
+
+        if not user.check_password(old_password):
+            return Response({'error': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['POST'])
@@ -209,3 +228,18 @@ def resend_verification_code(request):
             'error': 'Failed to send verification code. Please try again later.'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_exam_profile(request):
+    try:
+        exam_profile = ExamProfile.objects.get(user=request.user)
+        serializer = UserExamProfileSerializer(exam_profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except ExamProfile.DoesNotExist:
+        return Response({'error': 'Exam profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data, status=status.HTTP_200_OK)

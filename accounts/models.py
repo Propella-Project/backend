@@ -7,12 +7,12 @@ import uuid
 # from core.models import UserSubject
 
 # Create your models here.
-LEARNING_FORMAT = (
-    ('text', 'Text'),
-    ('audio', 'Audio'),
-    ('video', 'Video'),
-    ('mixed', 'Mixed')
-)
+# LEARNING_FORMAT = (
+#     ('text', 'Text'),
+#     ('audio', 'Audio'),
+#     ('video', 'Video'),
+#     ('mixed', 'Mixed')
+# )
 
 ROLE_CHOICES = (
     ('student', 'Student'),
@@ -58,7 +58,7 @@ class ExamProfile(models.Model):
     exam_date = models.DateField(blank=True, null=True)
     daily_hours = models.IntegerField(blank=True, null=True)
     personality = models.CharField(max_length=255, blank=True, null=True)
-    learning_format = models.CharField(max_length=50, blank=True, null=True, choices=LEARNING_FORMAT)
+    # learning_format = models.CharField(max_length=50, blank=True, null=True, choices=LEARNING_FORMAT)
     voice_pref = models.CharField(max_length=25, blank=True, null=True, choices=VOICE_PREF)
     total_points = models.DecimalField(max_digits=12, decimal_places=2 , default=0.00)
     
