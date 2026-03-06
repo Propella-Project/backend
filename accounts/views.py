@@ -1,8 +1,17 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import User, ExamProfile, EmailVerification, Referral
-from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer
+from .models import User, ExamProfile, EmailVerification, Referral, Plan, Subscription
+from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer
 from .utils import send_verification_code
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from  rest_framework import status
@@ -73,7 +82,72 @@ def change_password(request):
         return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    email = request.data.get("email")
+    
+    try:
+        user = User.objects.get(email=email)
+        uid = urlsafe_base64_encode(force_bytes(user.id))
+        token = default_token_generator.make_token(user)
+        
+        reset_link = f"http://propella-api.vercel.app/reset-password/{uid}/{token}/"
+        
+        # send email logic
+        subject = "Password Reset Request"
 
+        message = f"""
+                            Hello {user.username},
+
+                            You requested to reset your password.
+
+                            Click the link below to reset your password:
+
+                            {reset_link}
+
+                            If you did not request this, please ignore this email.
+
+                            Thanks,
+                            Your Team
+                    """
+
+        send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        
+        return Response({
+                "message": "Password reset link sent",
+                "reset_link": reset_link
+            })
+        
+    except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+        
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def reset_password(request, uid, token):
+    
+    password = request.data.get("password")
+
+    try:
+        user_id = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(id=user_id)
+
+        if default_token_generator.check_token(user, token):
+            user.password = make_password(password)
+            user.save()
+
+            return Response({"message": "Password reset successful"})
+
+        return Response({"error": "Invalid token"}, status=400)
+
+    except:
+        return Response({"error": "Invalid request"}, status=400)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -243,3 +317,44 @@ def user_exam_profile(request):
 def user_profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def plan_list(request):
+    plans = Plan.objects.all()
+    serializer = PlanSerializer(plans, many=True)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def subscribe_view(request):
+    plan_id = request.data.get("plan_id")
+    try:
+        plan = Plan.objects.get(id=plan_id)
+    except Plan.DoesNotExist:
+        return Response({"error": "invalid plan"}, status=400)
+    
+    subscription = Subscription.objects.create(
+        user=request.user,
+        plan=plan,
+        end_date=timezone.now() + timedelta(days=plan.duration_days)
+    )
+    
+    return Response({
+        "message":"Subscription activated",
+        "expires_at":subscription.end_date
+    }, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_subscription(request):
+    subscription = Subscription.objects.filter(
+        user=request.user,
+        is_active=True
+    )
+    if not subscription:
+        return Response({"message":"No active subscription"}, status=400)
+    
+    serializer = SubscriptionSerializer(subscription)
+    return Response(serializer.data, status=200)    

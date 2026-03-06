@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
-from .models import User, ExamProfile, Referral
+from .models import User, ExamProfile, Referral, Subscription, Plan
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -58,6 +58,15 @@ class ChangePasswordSerializer(serializers.Serializer):
         except DjangoValidationError as e:
             raise serializers.ValidationError(e.messages)
         return value
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=8)
+    token = serializers.CharField()
+    uid = serializers.CharField()
+
     
     
 class CreateExamProfileSerializer(serializers.ModelSerializer):
@@ -91,3 +100,15 @@ class AllExamProfilesSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Referral
 #         fields = ['id', 'referrer', 'referred']
+
+class PlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = '__all__'
+        
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+        read_only_fields = ['user', 'start_date']
+        

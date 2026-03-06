@@ -1,6 +1,7 @@
 from django.urls import path
 from accounts import views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.contrib.auth import views as auth_views
 
 app_name = 'accounts'
 
@@ -15,5 +16,13 @@ urlpatterns = [
     path('edit-user/<int:user_id>/', views.edit_user, name='edit_user'),
     path('create-exam-profile/', views.create_exam_profile, name='create_exam_profile'),
     path('edit-exam-profile/<int:profile_id>/', views.edit_exam_profile, name='edit_exam_profile'),
+    
+    # =================================================== Subscription =======================
+    path('subscriptions/plans/', views.plan_list, name="plan_list"),
+    path('subscriptions/subscribe/', views.subscribe_view, name="subscribe_view"),
+    
+    # ===================================  password reset ======================================
+    path('forgot-password/', views.forgot_password, name="forgot-password"),
+    path('reset-password/<uid>/<token>/', views.reset_password, name="reset-password")
 
 ]

@@ -12,6 +12,7 @@ from .models import (
     Question,
     Choice,
     AbilityScore,
+    # Notification
 )
 from django.contrib.auth import get_user_model
 
@@ -83,3 +84,9 @@ class RoadmapTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoadmapTask
         fields = '__all__'
+        
+# class CreateNotificationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Notification
+#         fields = ['user', 'text']
+        

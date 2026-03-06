@@ -31,6 +31,8 @@ class User(AbstractUser):
     is_email_verified = models.BooleanField(default=False)
     referral_code = models.CharField(max_length=12, null=True, blank=True)
     referred_by = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
@@ -61,6 +63,8 @@ class ExamProfile(models.Model):
     # learning_format = models.CharField(max_length=50, blank=True, null=True, choices=LEARNING_FORMAT)
     voice_pref = models.CharField(max_length=25, blank=True, null=True, choices=VOICE_PREF)
     total_points = models.DecimalField(max_digits=12, decimal_places=2 , default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.user.username}'s Exam Profile"
@@ -132,4 +136,30 @@ class Referral(models.Model):
     
     def __str__(self):
         return f"{self.referrer.username} referred {self.referred.username} - Status: {self.status}"
-    
+
+
+class Plan(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    duration_days = models.IntegerField()
+    description = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField()
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        
+        return f"{self.user} - {self.plan}"

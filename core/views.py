@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 # Create your views here.
 def login_admin(request):
@@ -47,6 +49,7 @@ def logout_admin(request):
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+
 
 from .models import (
     Subject,
@@ -101,3 +104,13 @@ def create_user_subject(request):
             'user_subject': serializer.data
         }, status=201)
     return Response(serializer.errors, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_subjects(request):
+    if not request.user.is_email_verified:
+        return Response({
+            'error': 'You must verify your email before adding subjects.'
+        }, status=400)
+    
+    user = User.object

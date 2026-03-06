@@ -152,6 +152,7 @@ class RoadmapDay(models.Model):
         return f"{self.roadmap.name} - Day {self.day_number}: {self.status} - {self.intensity_level} - {self.repition_phase}"
     
     def tasks(self):
+        
         return RoadmapTask.objects.filter(day=self)
     
 class RoadmapTask(models.Model):
@@ -168,3 +169,14 @@ class RoadmapTask(models.Model):
     
     
 
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+    
+    def __str__(self):
+        return f"{self.user.username}'s notification"
+    
+    
