@@ -1,6 +1,3 @@
-import requests
+from config.settings.prod import FLUTTERWAVE_SECRET_KEY
 
-url = "https://api.propella.ng/"
-
-response = requests.get(url)
-print(response.status_code)
+print(FLUTTERWAVE_SECRET_KEY)

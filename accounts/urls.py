@@ -21,8 +21,8 @@ urlpatterns = [
     # ================================================ Referrals urls ==============================
     path('referrals/', views.my_referrals, name="my-referrals"),
     # =================================================== Subscription ========================
-    path('subscriptions/plans/', views.plan_list, name="plan_list"),
-    path('subscriptions/subscribe/', views.subscribe_view, name="subscribe_view"),
+    path('subscribe/', views.subscribe, name="subscribe"),
+    path('verify-subscription/', views.verify_subscription, name="verify-subscription"),
     
     # ===================================  password reset ======================================
     path('forgot-password/', views.forgot_password, name="forgot-password"),

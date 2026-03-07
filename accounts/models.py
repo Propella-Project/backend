@@ -51,9 +51,12 @@ class User(AbstractUser):
     def user_referrals(self):
         return Referral.objects.filter(referrer=self)
     
-    # def subjects(self):
-    #     return UserSubject.objects.filter(user=self)
-    
+    def total_points(self):
+        ref = Referral.objects.filter(referrer=self)
+        for p in ref:
+            points += p.points
+            
+        return points
     
 class ExamProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -139,7 +142,7 @@ class Referral(models.Model):
 
 
 class Plan(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     duration_days = models.IntegerField()
     description = models.TextField(blank=True)
@@ -157,9 +160,21 @@ class Subscription(models.Model):
     end_date = models.DateTimeField()
 
     is_active = models.BooleanField(default=True)
+    payment_reference = models.CharField(max_length=50, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        # Automatically calculate expiry
+        if not self.end_date:
+            self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
+
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.end_date
+    
     def __str__(self):
         
         return f"{self.user} - {self.plan}"
+    

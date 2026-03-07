@@ -10,7 +10,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
-from django.conf import settings
+from config.settings.prod import FLUTTERWAVE_SECRET_KEY, DEFAULT_FROM_EMAIL
+import requests
+import uuid
 
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -19,6 +21,20 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
 # Create your views here.
+# =========================== check user's verification status============
+def is_active_subscription(user):
+    sub = Subscription.objects.filter(user=user, is_active=True).first()
+    
+    if not sub:
+        return False
+    
+    if sub.end_date < timezone.now():
+        sub.is_active = False
+        sub.save()
+        return False
+    return True
+
+# ========================================================
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -115,7 +131,7 @@ def forgot_password(request):
         send_mail(
                 subject,
                 message,
-                settings.DEFAULT_FROM_EMAIL,
+                DEFAULT_FROM_EMAIL,
                 [user.email],
                 fail_silently=False,
             )
@@ -318,7 +334,6 @@ def user_profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_referrals(request):
@@ -326,34 +341,12 @@ def my_referrals(request):
     serializer = ReferralSerializer(referrals, many=True)
     return Response(serializer.data, status=200)
 
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def plan_list(request):
     plans = Plan.objects.all()
     serializer = PlanSerializer(plans, many=True)
     return Response(serializer.data, status=200)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def subscribe_view(request):
-    plan_id = request.data.get("plan_id")
-    try:
-        plan = Plan.objects.get(id=plan_id)
-    except Plan.DoesNotExist:
-        return Response({"error": "invalid plan"}, status=400)
-    
-    subscription = Subscription.objects.create(
-        user=request.user,
-        plan=plan,
-        end_date=timezone.now() + timedelta(days=plan.duration_days)
-    )
-    
-    return Response({
-        "message":"Subscription activated",
-        "expires_at":subscription.end_date
-    }, status=200)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -366,4 +359,90 @@ def my_subscription(request):
         return Response({"message":"No active subscription"}, status=400)
     
     serializer = SubscriptionSerializer(subscription)
-    return Response(serializer.data, status=200)    
+    return Response(serializer.data, status=200)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def subscribe(request):
+    
+    existing = Subscription.objects.filter(
+        user=request.user,
+        is_active=True
+    ).first()
+    
+    if existing:
+        return Response({"error":"You already have an active subscription"})
+
+    plan_id = request.data.get("plan_id")
+
+    try:
+        plan = Plan.objects.get(id=plan_id)
+
+        tx_ref = str(uuid.uuid4())
+
+        url = "https://api.flutterwave.com/v3/payments"
+
+        headers = {
+            "Authorization": f"Bearer {FLUTTERWAVE_SECRET_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "tx_ref": tx_ref,
+            "amount": str(plan.price),
+            "currency": "NGN",
+            "redirect_url": "https://propella.ng/payment-success",
+            "customer": {
+                "email": request.user.email,
+                "name": request.user.username
+            },
+            "customizations": {
+                "title": f"{plan.name} Subscription"
+            }
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+
+        return Response(response.json())
+
+    except Plan.DoesNotExist:
+        return Response({"error": "Plan not found"}, status=404)
+    
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def verify_subscription(request):
+
+    transaction_id = request.data.get("transaction_id")
+    plan_id = request.data.get("plan_id")
+
+    url = f"https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
+
+    headers = {
+        "Authorization": f"Bearer {FLUTTERWAVE_SECRET_KEY}"
+    }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    if data["status"] == "success":
+
+        plan = Plan.objects.get(id=plan_id)
+
+        start = timezone.now()
+        end = start + timedelta(days=plan.duration_days)
+
+        subscription = Subscription.objects.create(
+            user=request.user,
+            plan=plan,
+            start_date=start,
+            end_date=end
+        )
+
+        return Response({
+            "message": "Subscription activated",
+            "subscription_id": subscription.id
+        })
+
+    return Response({"error": "Payment verification failed"}, status=400)
+
