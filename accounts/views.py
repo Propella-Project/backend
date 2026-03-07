@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import User, ExamProfile, EmailVerification, Referral, Plan, Subscription
-from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer
+from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, ReferralSerializer
 from .utils import send_verification_code
 from django.utils import timezone
 from datetime import timedelta
@@ -92,7 +92,7 @@ def forgot_password(request):
         uid = urlsafe_base64_encode(force_bytes(user.id))
         token = default_token_generator.make_token(user)
         
-        reset_link = f"http://propella-api.vercel.app/reset-password/{uid}/{token}/"
+        reset_link = f"http://propella.ng/reset-password/{uid}/{token}/"
         
         # send email logic
         subject = "Password Reset Request"
@@ -317,6 +317,15 @@ def user_exam_profile(request):
 def user_profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_referrals(request):
+    referrals = Referral.objects.filter(referrer=request.user)
+    serializer = ReferralSerializer(referrals, many=True)
+    return Response(serializer.data, status=200)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

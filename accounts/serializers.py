@@ -96,10 +96,10 @@ class AllExamProfilesSerializer(serializers.ModelSerializer):
         model = ExamProfile
         fields = ['id', 'user', 'exam_date', 'daily_hours', 'personality', 'learning_format', 'voice_pref', 'total_points']
         
-# class CreateReferralSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Referral
-#         fields = ['id', 'referrer', 'referred']
+class ReferralSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Referral
+        fields = '__all__'
 
 class PlanSerializer(serializers.ModelSerializer):
     class Meta:

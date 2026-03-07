@@ -6,6 +6,7 @@ from django.contrib.auth import views as auth_views
 app_name = 'accounts'
 
 urlpatterns = [
+    # ================================================ Auth urls ==============================
     path('register/', views.register_user, name='register'),
     path('verify-email/', views.verify_email, name='verify_email'),
     path('resend-code/', views.resend_verification_code, name='resend_code'),
@@ -17,7 +18,9 @@ urlpatterns = [
     path('create-exam-profile/', views.create_exam_profile, name='create_exam_profile'),
     path('edit-exam-profile/<int:profile_id>/', views.edit_exam_profile, name='edit_exam_profile'),
     
-    # =================================================== Subscription =======================
+    # ================================================ Referrals urls ==============================
+    path('referrals/', views.my_referrals, name="my-referrals"),
+    # =================================================== Subscription ========================
     path('subscriptions/plans/', views.plan_list, name="plan_list"),
     path('subscriptions/subscribe/', views.subscribe_view, name="subscribe_view"),
     
