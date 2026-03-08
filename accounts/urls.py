@@ -21,6 +21,7 @@ urlpatterns = [
     # ================================================ Referrals urls ==============================
     path('referrals/', views.my_referrals, name="my-referrals"),
     # =================================================== Subscription ========================
+    path('plans/', views.plan_list, name="plans"),
     path('subscribe/', views.subscribe, name="subscribe"),
     path('verify-subscription/', views.verify_subscription, name="verify-subscription"),
     
