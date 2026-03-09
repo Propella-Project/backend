@@ -47,10 +47,10 @@ def register_user(request):
     serializer = CreateUserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        
         # Generate and send verification code
         verification = EmailVerification.generate_for_user(user)
         email_sent = send_verification_code(user, verification)
+        
         
         if email_sent:
             return Response({
@@ -108,7 +108,7 @@ def forgot_password(request):
         uid = urlsafe_base64_encode(force_bytes(user.id))
         token = default_token_generator.make_token(user)
         
-        reset_link = f"http://propella.ng/reset-password/{uid}/{token}/"
+        reset_link = f"https://propella.ng/reset-password/{uid}/{token}/"
         
         # send email logic
         subject = "Password Reset Request"

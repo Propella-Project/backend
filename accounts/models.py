@@ -31,8 +31,8 @@ class User(AbstractUser):
     is_email_verified = models.BooleanField(default=False)
     referral_code = models.CharField(max_length=12, null=True, blank=True)
     referred_by = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
