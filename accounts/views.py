@@ -392,7 +392,7 @@ def subscribe(request):
             "tx_ref": tx_ref,
             "amount": str(plan.price),
             "currency": "NGN",
-            "redirect_url": "https://propella.ng/payment-success",
+            "redirect_url": "https://dashboard.propella.ng/verify",
             "customer": {
                 "email": request.user.email,
                 "name": request.user.username
