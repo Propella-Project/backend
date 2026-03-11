@@ -179,14 +179,14 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.user.username}'s notification"
     
-class DiagnosticQuiz(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    score = models.ManyToOneRel(max_digits=5, decimal_places=2)
-    taken_at = models.DateTimeField(auto_now_add=True)
-    quiz = models.ForeignKey()
+# class DiagnosticQuiz(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+#     score = models.ManyToOneRel(max_digits=5, decimal_places=2)
+#     taken_at = models.DateTimeField(auto_now_add=True)
+#     quiz = models.ForeignKey()
 
-    def __str__(self):
+#     def __str__(self):
         
-        return f"{self.user.username}'s Diagnostic Quiz for {self.subject.name} - Score: {self.score}"
+#         return f"{self.user.username}'s Diagnostic Quiz for {self.subject.name} - Score: {self.score}"
     

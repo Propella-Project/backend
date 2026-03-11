@@ -446,3 +446,8 @@ def verify_subscription(request):
 
     return Response({"error": "Payment verification failed"}, status=400)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_subscription(request):
+    # Payment is done on the frontend get payment reference and create a subscription for the user
+    ...
