@@ -4,13 +4,60 @@
 
 Propella is a Django-based platform for exam preparation and user management. It includes features for user registration, authentication, exam profiles, subscriptions, referrals, and admin access. The API uses Django REST Framework with JWT authentication.
 
+## Authentication Flows
+
+Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide for frontend developers on how authentication works:
+
+### JWT Basics
+- **Access Token**: Short-lived token (15-30 minutes) used for API requests.
+- **Refresh Token**: Long-lived token used to get new access tokens without re-login.
+- **Storage**: Store tokens securely (localStorage for web apps, secure storage for mobile).
+- **Headers**: Include `Authorization: Bearer <access_token>` in authenticated requests.
+
+### User Registration and Login Flow
+
+1. **User Signs Up**
+   - Call: POST /api/accounts/register/
+   - User receives email verification code.
+
+2. **Verify Email**
+   - Call: POST /api/accounts/verify-email/
+   - User enters code to activate account.
+
+3. **User Logs In**
+   - Call: POST /api/accounts/token/
+   - Receive access and refresh tokens.
+   - Store tokens for future requests.
+
+4. **Making Authenticated Requests**
+   - Add header: `Authorization: Bearer <access_token>`
+   - Include `Content-Type: application/json` for POST/PUT requests.
+
+5. **Token Refresh**
+   - When access token expires, call POST /api/accounts/token/refresh/ with refresh token.
+   - Get new access token, update storage.
+
+6. **Logout**
+   - Clear stored tokens from storage.
+   - Optional: Call logout endpoint if needed.
+
+### Admin Authentication
+- Admins use separate login: POST /api/core/login-admin/
+- Same JWT flow applies.
+
+### Error Handling
+- 401 Unauthorized: Token expired or invalid → refresh token or re-login.
+- 403 Forbidden: Insufficient permissions.
+- 400 Bad Request: Validation errors.
+
 ## API Endpoints
 
 ### 1. Register User
 **Method:** POST  
 **URL:** /api/accounts/register/  
-**Description:** Registers a new user account.  
+**Description:** Registers a new user account. Call this when user submits signup form.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"email": "string", "password": "string", "referral_code": "string (optional)"}`  
 **Success Response (201):**  
@@ -35,8 +82,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 2. Verify Email
 **Method:** POST  
 **URL:** /api/accounts/verify-email/  
-**Description:** Verifies user email with a code.  
+**Description:** Verifies user email with verification code. Call after user receives email.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"email": "string", "code": "string"}`  
 **Success Response (200):**  
@@ -55,8 +103,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 3. Resend Verification Code
 **Method:** POST  
 **URL:** /api/accounts/resend-code/  
-**Description:** Resends verification code to email.  
+**Description:** Resends verification code if user didn't receive it. Call on "Resend Code" button.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"email": "string"}`  
 **Success Response (200):**  
@@ -75,8 +124,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 4. Login (Token)
 **Method:** POST  
 **URL:** /api/accounts/token/  
-**Description:** Authenticates user and returns JWT tokens.  
+**Description:** Authenticates user and returns JWT tokens. Call on login form submit.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"email": "string", "password": "string"}`  
 **Success Response (200):**  
@@ -96,8 +146,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 5. Refresh Token
 **Method:** POST  
 **URL:** /api/accounts/token/refresh/  
-**Description:** Refreshes access token using refresh token.  
+**Description:** Gets new access token using refresh token. Call automatically when access token expires.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"refresh": "string"}`  
 **Success Response (200):**  
@@ -116,8 +167,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 6. Change Password
 **Method:** POST  
 **URL:** /api/accounts/change-password/  
-**Description:** Changes user password.  
+**Description:** Changes user password. Call from password change form.  
 **Authentication:** JWT (access token)  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"old_password": "string", "new_password": "string"}`  
 **Success Response (200):**  
@@ -136,8 +188,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 7. Get All Users
 **Method:** GET  
 **URL:** /api/accounts/all-users/  
-**Description:** Retrieves list of all users (admin only).  
+**Description:** Retrieves list of all users (admin only). Call for admin dashboard.  
 **Authentication:** JWT (admin)  
+**Headers:** Authorization: Bearer {token}  
 **Parameters:** None  
 **Success Response (200):**  
 ```json
@@ -159,8 +212,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 8. Edit User
 **Method:** PUT  
 **URL:** /api/accounts/edit-user/  
-**Description:** Updates user profile.  
+**Description:** Updates user profile. Call from profile edit form.  
 **Authentication:** JWT  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"email": "string", "first_name": "string", etc.}`  
 **Success Response (200):**  
@@ -180,8 +234,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 9. Create Exam Profile
 **Method:** POST  
 **URL:** /api/accounts/create-exam-profile/  
-**Description:** Creates an exam profile for the user.  
+**Description:** Creates an exam profile for the user. Call after user selects exam type and subjects.  
 **Authentication:** JWT  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"exam_type": "string", "subjects": ["string"]}`  
 **Success Response (201):**  
@@ -201,8 +256,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 10. Edit Exam Profile
 **Method:** PUT  
 **URL:** /api/accounts/edit-exam-profile/  
-**Description:** Updates exam profile.  
+**Description:** Updates exam profile. Call when user modifies their exam preferences.  
 **Authentication:** JWT  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"exam_type": "string", "subjects": ["string"]}`  
 **Success Response (200):**  
@@ -222,8 +278,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 11. My Referrals
 **Method:** GET  
 **URL:** /api/accounts/my-referrals/  
-**Description:** Gets user's referrals.  
+**Description:** Gets user's referrals. Call to display referral list in user dashboard.  
 **Authentication:** JWT  
+**Headers:** Authorization: Bearer {token}  
 **Parameters:** None  
 **Success Response (200):**  
 ```json
@@ -246,8 +303,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 12. Get Plans
 **Method:** GET  
 **URL:** /api/accounts/plans/  
-**Description:** Retrieves available subscription plans.  
+**Description:** Retrieves available subscription plans. Call to show pricing options.  
 **Authentication:** JWT  
+**Headers:** Authorization: Bearer {token}  
 **Parameters:** None  
 **Success Response (200):**  
 ```json
@@ -269,8 +327,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 13. Subscribe
 **Method:** POST  
 **URL:** /api/accounts/subscribe/  
-**Description:** Subscribes user to a plan.  
+**Description:** Subscribes user to a plan. Call after user selects a plan. Returns payment URL.  
 **Authentication:** JWT  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"plan_id": 1}`  
 **Success Response (200):**  
@@ -290,8 +349,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 14. Verify Subscription
 **Method:** POST  
 **URL:** /api/accounts/verify-subscription/  
-**Description:** Verifies payment and activates subscription.  
+**Description:** Verifies payment and activates subscription. Call after payment completion.  
 **Authentication:** JWT  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"reference": "string"}`  
 **Success Response (200):**  
@@ -310,8 +370,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 15. Forgot Password
 **Method:** POST  
 **URL:** /api/accounts/forgot-password/  
-**Description:** Sends password reset email.  
+**Description:** Sends password reset email. Call from forgot password form.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"email": "string"}`  
 **Success Response (200):**  
@@ -330,8 +391,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 16. Reset Password
 **Method:** POST  
 **URL:** /api/accounts/reset-password/  
-**Description:** Resets password with token.  
+**Description:** Resets password with reset token. Call from reset password form.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"token": "string", "new_password": "string"}`  
 **Success Response (200):**  
@@ -350,8 +412,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 17. Admin Login
 **Method:** POST  
 **URL:** /api/core/login-admin/  
-**Description:** Logs in admin user.  
+**Description:** Logs in admin user. Call for admin login.  
 **Authentication:** None  
+**Headers:** Content-Type: application/json  
 **Parameters:**  
 - Body: `{"username": "string", "password": "string"}`  
 **Success Response (200):**  
@@ -371,8 +434,9 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 18. Admin Logout
 **Method:** POST  
 **URL:** /api/core/logout-admin/  
-**Description:** Logs out admin.  
+**Description:** Logs out admin. Call on admin logout.  
 **Authentication:** JWT  
+**Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
 - Body: `{"refresh": "string"}`  
 **Success Response (200):**  
@@ -391,7 +455,7 @@ Propella is a Django-based platform for exam preparation and user management. It
 ### 19. API Documentation
 **Method:** GET  
 **URL:** /api/docs/  
-**Description:** Displays API documentation page.  
+**Description:** Displays API documentation page. Call to view interactive docs.  
 **Authentication:** None  
 **Parameters:** None  
 **Response:** HTML page with API docs.
