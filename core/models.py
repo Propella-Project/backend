@@ -125,7 +125,7 @@ INTENSITY_LEVEL = (
 
 class Roadmap(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start_date = models.DateField(blank=True, null=True)
+    start_date = models.DateField(auto_now_add=True, blank=True, null=True)
     exam_date = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=50, blank=True, null=True, choices=STATUS)
     current_day = models.IntegerField(blank=True, null=True)

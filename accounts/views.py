@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import User, ExamProfile, EmailVerification, Referral, Plan, Subscription
+from core.models import Roadmap, RoadmapDay, RoadmapTask
 from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, ReferralSerializer,LoginSerializer
 from .utils import send_verification_code
 from django.utils import timezone
@@ -69,6 +70,7 @@ def login_user(request):
         },
         status=status.HTTP_200_OK
     )
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
@@ -234,7 +236,6 @@ def all_users(request):
     users = User.objects.all()
     return Response(AllUsersSerializer(users, many=True).data, status=status.HTTP_200_OK)
 
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_email(request):
@@ -307,7 +308,6 @@ def verify_email(request):
     return Response({
         'message': 'Email verified successfully. Your account is now active.'
     }, status=status.HTTP_200_OK)
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -394,7 +394,6 @@ def my_subscription(request):
     serializer = SubscriptionSerializer(subscription)
     return Response(serializer.data, status=200)
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def subscribe(request):
@@ -478,9 +477,3 @@ def verify_subscription(request):
         })
 
     return Response({"error": "Payment verification failed"}, status=400)
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def create_subscription(request):
-    # Payment is done on the frontend get payment reference and create a subscription for the user
-    ...

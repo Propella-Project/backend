@@ -29,6 +29,8 @@ urlpatterns = [
     
     # ===================================  password reset ======================================
     path('forgot-password/', views.forgot_password, name="forgot-password"),
-    path('reset-password/<uid>/<token>/', views.reset_password, name="reset-password")
+    path('reset-password/<uid>/<token>/', views.reset_password, name="reset-password"),
+    
+    
 
 ]

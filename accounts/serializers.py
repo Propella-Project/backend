@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.db import transaction
 from .models import User, ExamProfile, Referral, Subscription, Plan
+from core.models import Roadmap, RoadmapDay, RoadmapTask
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth import authenticate
@@ -133,4 +134,5 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = '__all__'
         read_only_fields = ['user', 'start_date']
+
         

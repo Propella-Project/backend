@@ -90,3 +90,30 @@ class CreateNotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
         
+        
+
+class GenerateRoadmapSerializer(serializers.Serializer):
+    subjects = serializers.ListField(child=serializers.CharField())
+    exam_date = serializers.DateField()
+    goal = serializers.CharField(required=False, allow_blank=True)
+    quiz_result = serializers.ListField(
+        child=serializers.DictField(),
+        required=False
+    )
+
+class RoadmapTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoadmapTask
+        fields = '__all__'
+
+class RoadmapDaySerializer(serializers.ModelSerializer):
+    tasks = RoadmapTaskSerializer(many=True, read_only=True)
+    class Meta:
+        model = RoadmapDay
+        fields = '__all__'
+
+class FullRoadmapSerializer(serializers.ModelSerializer):
+    days = RoadmapDaySerializer(many=True, read_only=True)
+    class Meta:
+        model = Roadmap
+        fields = '__all__'

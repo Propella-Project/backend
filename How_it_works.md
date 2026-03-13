@@ -151,6 +151,40 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
 }
 ```
 
+### 4b. Login (User Info)
+**Method:** POST  
+**URL:** /api/accounts/login/  
+**Description:** Authenticates user and returns JWT tokens plus basic user info. Call on login form submit when you need the authenticated user's ID and username along with tokens.  
+**Authentication:** None  
+**Headers:** Content-Type: application/json  
+**Parameters:**  
+- Body: `{"email": "string", "password": "string"}`  
+**Success Response (200):**  
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "access": "jwt_access_token",
+    "refresh": "jwt_refresh_token",
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "username": "user"
+    }
+  }
+}
+```  
+**Error Response (400):**  
+```json
+{
+  "success": false,
+  "errors": {
+    "non_field_errors": ["Invalid email or password"]
+  }
+}
+```
+
 ### 5. Refresh Token
 **Method:** POST  
 **URL:** /api/accounts/token/refresh/  
