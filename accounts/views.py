@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import User, ExamProfile, EmailVerification, Referral, Plan, Subscription
-from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, ReferralSerializer
+from .serializers import CreateUserSerializer, EditUserSerializer, CreateExamProfileSerializer, EditExamProfileSerializer, AllUsersSerializer, AllExamProfilesSerializer, ChangePasswordSerializer, UserExamProfileSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, ReferralSerializer,LoginSerializer
 from .utils import send_verification_code
 from django.utils import timezone
 from datetime import timedelta
@@ -19,6 +19,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from  rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 # Create your views here.
 # =========================== check user's verification status============
@@ -35,7 +37,38 @@ def is_active_subscription(user):
     return True
 
 # ========================================================
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def login_user(request):
 
+    serializer = LoginSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(
+            {"success": False, "errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user = serializer.validated_data["user"]
+
+    refresh = RefreshToken.for_user(user)
+
+    return Response(
+        {
+            "success": True,
+            "message": "Login successful",
+            "data": {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username
+                }
+            }
+        },
+        status=status.HTTP_200_OK
+    )
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):

@@ -169,3 +169,31 @@ def get_all_streaks(request):
     streaks = Streak.objects.all()
     serializer = StreakSerializer(streaks, many=True)
     return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_all_topics(request):
+    topics = Topic.objects.all()
+    serializer = TopicSerializer(topics, many=True)
+    return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_all_study_materials(request):
+    study_materials = StudyMaterial.objects.all()
+    serializer = StudyMaterialSerializer(study_materials, many=True)
+    return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_all_assignments(request):
+    assignments = Assignment.objects.all()
+    serializer = AssignmentSerializer(assignments, many=True)
+    return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_all_questions(request):
+    questions = Question.objects.all()
+    serializer = QuestionSerializer(questions, many=True)
+    return Response(serializer.data, status=200)

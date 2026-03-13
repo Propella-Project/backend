@@ -3,7 +3,29 @@ from django.db import transaction
 from .models import User, ExamProfile, Referral, Subscription, Plan
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.contrib.auth import authenticate
 
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+
+        email = data.get("email")
+        password = data.get("password")
+
+        user = authenticate(username=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+
+        if not user.is_active:
+            raise serializers.ValidationError("Account disabled")
+
+        data["user"] = user
+        return data
+    
 class CreateUserSerializer(serializers.ModelSerializer):
     referral_code = serializers.CharField(required=False, allow_blank=True, max_length=12, write_only=True)
     class Meta:

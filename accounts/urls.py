@@ -8,6 +8,7 @@ app_name = 'accounts'
 urlpatterns = [
     # ================================================ Auth urls ==============================
     path('register/', views.register_user, name='register'),
+    path('login/', views.login_user, name='login'),
     path('verify-email/', views.verify_email, name='verify_email'),
     path('resend-code/', views.resend_verification_code, name='resend_code'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

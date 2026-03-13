@@ -7,6 +7,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 load_dotenv()
+from datetime import timedelta
 
 from .base import *
 
@@ -199,3 +200,15 @@ EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD=os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL=os.getenv('DEFAULT_FROM_EMAIL')
 FLUTTERWAVE_SECRET_KEY=os.getenv('FLUTTERWAVE_SECRET_KEY')
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
