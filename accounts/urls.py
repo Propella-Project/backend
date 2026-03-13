@@ -17,6 +17,7 @@ urlpatterns = [
     path('edit-user/<int:user_id>/', views.edit_user, name='edit_user'),
     path('create-exam-profile/', views.create_exam_profile, name='create_exam_profile'),
     path('edit-exam-profile/<int:profile_id>/', views.edit_exam_profile, name='edit_exam_profile'),
+    path('current_user/', views.user_profile, name="current-user"),
     
     # ================================================ Referrals urls ==============================
     path('referrals/', views.my_referrals, name="my-referrals"),

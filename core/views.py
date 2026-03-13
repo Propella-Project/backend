@@ -113,4 +113,59 @@ def get_user_subjects(request):
             'error': 'You must verify your email before adding subjects.'
         }, status=400)
     
-    user = User.object
+    user = User.objects.get(id=request.user.id)
+    user_subjects = UserSubject.objects.filter(user=user)
+    
+    serializer = UserSubjectSerializer(user_subjects, many=True)
+    return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_user_subject(request, user_subject_id):
+    if not request.user.is_email_verified:
+        return Response({
+            'error': 'You must verify your email before adding subjects.'
+        }, status=400)
+    
+    try:
+        user_subject = UserSubject.objects.get(id=user_subject_id, user=request.user)
+    except UserSubject.DoesNotExist:
+        return Response({
+            'error': 'User subject not found.'
+        }, status=404)
+    
+    serializer = UserSubjectSerializer(user_subject, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({
+            'message': 'User subject updated successfully',
+            'user_subject': serializer.data
+        }, status=200)
+    return Response(serializer.errors, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def delete_user_subject(request, user_subject_id):
+    if not request.user.is_email_verified:
+        return Response({
+            'error': 'You must verify your email before adding subjects.'
+        }, status=400)
+    
+    try:
+        user_subject = UserSubject.objects.get(id=user_subject_id, user=request.user)
+    except UserSubject.DoesNotExist:
+        return Response({
+            'error': 'User subject not found.'
+        }, status=404)
+    
+    user_subject.delete()
+    return Response({
+        'message': 'User subject deleted successfully'
+    }, status=200)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_all_streaks(request):
+    streaks = Streak.objects.all()
+    serializer = StreakSerializer(streaks, many=True)
+    return Response(serializer.data, status=200)
