@@ -132,7 +132,7 @@ class Roadmap(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.user.username}'s Roadmap - Status: {self.status}"
     
     def days(self):
         return RoadmapDay.objects.filter(roadmap=self)

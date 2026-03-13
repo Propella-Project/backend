@@ -12,7 +12,15 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
 - **Access Token**: Short-lived token (15-30 minutes) used for API requests.
 - **Refresh Token**: Long-lived token used to get new access tokens without re-login.
 - **Storage**: Store tokens securely (localStorage for web apps, secure storage for mobile).
-- **Headers**: Include `Authorization: Bearer <access_token>` in authenticated requests.
+
+#### Common HTTP Headers
+- `Content-Type: application/json` for request bodies.
+- `Authorization: Bearer <access_token>` for authenticated endpoints.
+
+#### Token Storage Tips (Frontend)
+- Store the **access token** in memory (state) for best security; refresh it before it expires.
+- Store the **refresh token** in a secure place (e.g., HttpOnly cookie or secure storage) and never expose it to JavaScript if possible.
+- If using localStorage, check for XSS protection (sanitize inputs, use CSP headers).
 
 ### User Registration and Login Flow
 
