@@ -477,3 +477,25 @@ def verify_subscription(request):
         })
 
     return Response({"error": "Payment verification failed"}, status=400)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def subscription_status(request):
+    subscription = Subscription.objects.filter(
+        user=request.user,
+        is_active=True
+    ).first()
+
+    if not subscription:
+        return Response({"active": False})
+
+    if subscription.end_date < timezone.now():
+        subscription.is_active = False
+        subscription.save()
+        return Response({"active": False})
+
+    return Response({
+        "active": True,
+        "plan": subscription.plan.name,
+        "expires_at": subscription.end_date
+    })

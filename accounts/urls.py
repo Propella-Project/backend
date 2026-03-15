@@ -19,6 +19,7 @@ urlpatterns = [
     path('create-exam-profile/', views.create_exam_profile, name='create_exam_profile'),
     path('edit-exam-profile/<int:profile_id>/', views.edit_exam_profile, name='edit_exam_profile'),
     path('current_user/', views.user_profile, name="current-user"),
+    path('current_exam_profile/', views.user_exam_profile, name="current-exam-profile"),
     
     # ================================================ Referrals urls ==============================
     path('referrals/', views.my_referrals, name="my-referrals"),
@@ -26,7 +27,7 @@ urlpatterns = [
     path('plans/', views.plan_list, name="plans"),
     path('subscribe/', views.subscribe, name="subscribe"),
     path('verify-subscription/', views.verify_subscription, name="verify-subscription"),
-    
+    path('subscription-status/', views.subscription_status, name="subscription-status"),
     # ===================================  password reset ======================================
     path('forgot-password/', views.forgot_password, name="forgot-password"),
     path('reset-password/<uid>/<token>/', views.reset_password, name="reset-password"),

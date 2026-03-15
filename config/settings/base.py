@@ -322,10 +322,6 @@ JAZZMIN_UI_TWEAKS = {
     "shadow_style": "shadow",
     "radius_style": "rounded",
 }
-
-
-
-
     
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

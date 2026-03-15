@@ -317,6 +317,32 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
 }
 ```
 
+### 10b. Get Current Exam Profile
+**Method:** GET  
+**URL:** /api/accounts/current_exam_profile/  
+**Description:** Retrieves the current user's exam profile. Call to pre-populate profile forms or display the user's current exam settings.  
+**Authentication:** JWT  
+**Headers:** Authorization: Bearer {token}  
+**Parameters:** None  
+**Success Response (200):**  
+```json
+{
+  "id": 1,
+  "user": 1,
+  "exam_date": "2024-12-31",
+  "daily_hours": 3,
+  "personality": "Focused",
+  "learning_format": "text",
+  "voice_pref": "female"
+}
+```  
+**Error Response (404):**  
+```json
+{
+  "error": "Exam profile not found"
+}
+```
+
 ### 11. My Referrals
 **Method:** GET  
 **URL:** /api/accounts/my-referrals/  

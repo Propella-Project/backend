@@ -204,31 +204,57 @@ def get_all_questions(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def create_roadmap(request):
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+    
     serializer = GenerateRoadmapSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     data = serializer.validated_data
-    
+    user = request.user
     # Check if user already has an active roadmap
-    existing_roadmap = Roadmap.objects.filter(user=request.user, is_active=True).first()
+    existing_roadmap = Roadmap.objects.filter(user=user, is_active=True).first()
     if existing_roadmap:
         return Response({"error": "You already have an active roadmap"}, status=status.HTTP_400_BAD_REQUEST)
     
+    
     # Send POST to AI API
     
-    url = "https://ai-api.propella.ng/study/roadmap"
     headers = {
         "Content-Type": "application/json",
-        "x-api-key": "propella_W_KYIHuDgQBt22c2BGKIRzEeiMYPmcbPLJ-RMMJeqj0"
+        "X-API-KEY": "propella_uPVtZrliOcYGHc0Ucp-eEd1OESR0zubFeb4ai0wb8Sw"  # Replace with your actual API key if needed
     }
+    
+    url = "https://ai-api.propella.ng/study/roadmap"
+    
+    # payload = {
+    #     "subjects": data["subjects"],
+    #     "exam_date": data["exam_date"].isoformat(),
+    #     "goal": data.get("goal", ""),
+    #     "quiz_result": data.get("quiz_result", [])
+    # }
+    
     payload = {
-        "subjects": data["subjects"],
-        "exam_date": data["exam_date"].isoformat(),
-        "goal": data.get("goal", ""),
-        "quiz_result": data.get("quiz_result", [])
+        "subjects": [
+            "physics"
+        ],
+        "exam_date": "2026-08-24",
+        "goal": "Be ready for JAMB exam",
+        "quiz_result": [
+            {
+            "subject": "physics",
+            "question": "what is the standard international unit of energy",
+            "options": [
+                "joule","force","potential"
+            ],
+            "correct_answer": "joule",
+            "student_answer": "force",
+            "time_used": 20
+            }
+        ]
     }
     
     try:
