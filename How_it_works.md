@@ -435,6 +435,39 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
 }
 ```
 
+### 14b. Subscription Status
+**Method:** GET  
+**URL:** /api/accounts/subscription-status/  
+**Description:** Check whether the current user has an active subscription and returns plan status + subscription details if active. Call to display subscription status on user dashboard.  
+**Authentication:** JWT  
+**Headers:** Authorization: Bearer {token}  
+**Parameters:** None  
+**Success Response (active subscription, 200):**  
+```json
+{
+  "active": true,
+  "plan": "Basic",
+  "expires_at": "2024-12-31T23:59:59Z",
+  "days_remaining": 20,
+  "subscription": {
+    "id": 1,
+    "user": 1,
+    "plan": 1,
+    "start_date": "2024-01-01T00:00:00Z",
+    "end_date": "2024-12-31T23:59:59Z",
+    "is_active": true,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+}
+```  
+**Success Response (no active subscription or expired, 200):**  
+```json
+{
+  "active": false
+}
+```
+
 ### 15. Forgot Password
 **Method:** POST  
 **URL:** /api/accounts/forgot-password/  

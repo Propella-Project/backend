@@ -493,9 +493,13 @@ def subscription_status(request):
         subscription.is_active = False
         subscription.save()
         return Response({"active": False})
+    
+    days_remaining = (subscription.end_date - timezone.now()).days
 
     return Response({
         "active": True,
         "plan": subscription.plan.name,
-        "expires_at": subscription.end_date
+        "expires_at": subscription.end_date,
+        "days_remaining": days_remaining,
+        "subscription": SubscriptionSerializer(subscription).data
     })
