@@ -470,7 +470,11 @@ def verify_subscription(request):
             start_date=start,
             end_date=end
         )
-
+        
+        user = request.user
+        user.onboarded = True
+        user.save()
+        
         return Response({
             "message": "Subscription activated",
             "subscription_id": subscription.id

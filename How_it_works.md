@@ -343,6 +343,30 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
 }
 ```
 
+### 10c. Get Current User Profile (user_profile schema)
+**Method:** GET  
+**URL:** /api/accounts/current_user/  
+**Description:** Retrieves the current authenticated user's profile. Call to show user details in UI and profile settings.  
+**Authentication:** JWT  
+**Headers:** Authorization: Bearer {token}  
+**Parameters:** None  
+**Success Response (200):**  
+```json
+{
+  "id": 1,
+  "username": "user",
+  "email": "user@example.com",
+  "role": "student",
+  "is_email_verified": true
+}
+```  
+**Error Response (401):**  
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
 ### 11. My Referrals
 **Method:** GET  
 **URL:** /api/accounts/my-referrals/  

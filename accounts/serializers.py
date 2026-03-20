@@ -68,7 +68,7 @@ class EditUserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'is_email_verified']
+        fields = ['id', 'username', 'email', 'role', 'is_email_verified', 'onboarded']
         
 
 class ChangePasswordSerializer(serializers.Serializer):
