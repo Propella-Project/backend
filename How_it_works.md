@@ -421,7 +421,7 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
 **Authentication:** JWT  
 **Headers:** Content-Type: application/json, Authorization: Bearer {token}  
 **Parameters:**  
-- Body: `{"reference": "string"}`  
+- Body: `{"transaction_id": "string"}`  
 **Success Response (200):**  
 ```json
 {

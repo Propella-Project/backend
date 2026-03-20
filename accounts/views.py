@@ -446,7 +446,7 @@ def subscribe(request):
 def verify_subscription(request):
 
     transaction_id = request.data.get("transaction_id")
-    plan_id = request.data.get("plan_id")
+    plan_id = "3"
 
     url = f"https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
 
