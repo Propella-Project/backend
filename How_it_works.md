@@ -357,7 +357,8 @@ Propella uses JWT (JSON Web Tokens) for secure authentication. Here's a guide fo
   "username": "user",
   "email": "user@example.com",
   "role": "student",
-  "is_email_verified": true
+  "is_email_verified": true,
+  "onboarded":true
 }
 ```  
 **Error Response (401):**  

@@ -65,6 +65,8 @@ def login_user(request):
                     "id": user.id,
                     "email": user.email,
                     "username": user.username
+                    "onboarded": user.onboarded,
+                    "is_email_verified": user.is_email_verified,
                 }
             }
         },
