@@ -145,7 +145,7 @@ def forgot_password(request):
         uid = urlsafe_base64_encode(force_bytes(user.id))
         token = default_token_generator.make_token(user)
         
-        reset_link = f"https://propella.ng/reset-password/{uid}/{token}/"
+        reset_link = f"https://dashboard.propella.ng/reset-password/{uid}/{token}/"
         
         # send email logic
         subject = "Password Reset Request"
